@@ -8,18 +8,18 @@ export const users = pgTable("users", {
     username: t.varchar().notNull(),
     password: t.varchar().notNull(),
     role: roles(),
-    firstName: t.varchar(),
-    lastName: t.varchar(),
-    createdAt: t.timestamp().defaultNow(),
+    firstName: t.varchar('first_name'),
+    lastName: t.varchar('last_name'),
+    createdAt: t.timestamp('created_at').defaultNow(),
 })
 
 export const product = pgTable("product", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-    productName: t.varchar(),
-    productSizeId: t.integer().references(() => productSize.id),
-    productColorId: t.integer().references(() => productColor.id),
-    productQty: t.integer(),
-    updatedAt: t.timestamp(),
+    productName: t.varchar('product_name'),
+    productSizeId: t.integer('product_size_id').references(() => productSize.id),
+    productColorId: t.integer('product_color_id').references(() => productColor.id),
+    productQty: t.integer('product_qty'),
+    updatedAt: t.timestamp('updated_at'),
 })
 
 export const productSize = pgTable("product_size", {
@@ -34,35 +34,35 @@ export const productColor = pgTable("product_color", {
 
 export const transaction = pgTable("transaction", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-    orderId: t.varchar(),
-    buyerFirstName: t.varchar(),
-    buyerLastName: t.varchar(),
-    paymentTypeId: t.integer().references(() => paymentType.id),
-    shippingProviderId: t.integer().references(() => shippingProvider.id),
-    shippingPostalCode: t.varchar(),
-    platformId: t.integer().references(() => platform.id),
-    isPaid: t.boolean(),
-    createdAt: t.timestamp().defaultNow(),
+    orderId: t.varchar('order_id'),
+    buyerFirstName: t.varchar('buyer_first_name'),
+    buyerLastName: t.varchar('buyer_last_name'),
+    paymentTypeId: t.integer('payment_type_id').references(() => paymentType.id),
+    shippingProviderId: t.integer('shipping_provider_id').references(() => shippingProvider.id),
+    shippingPostalCode: t.varchar('shipping_postal_code'),
+    platformId: t.integer('platform_id').references(() => platform.id),
+    isPaid: t.boolean('is_paid').default(false),
+    createdAt: t.timestamp('created_at').defaultNow(),
 })
 
 export const paymentType = pgTable("payment_type", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-    paymentType: t.varchar(),
+    paymentType: t.varchar('payment_type'),
 })
 
 export const shippingProvider = pgTable("shipping_provider", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-    shippingProvider: t.varchar(),
+    shippingProvider: t.varchar('shipping_provider'),
 })
 
 export const platform = pgTable("platform", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-    platformName: t.varchar(),
+    platformName: t.varchar('platform_name'),
 })
 
 export const transactionItem = pgTable("transaction_item", {
-    transactionId: t.integer().notNull().references(() => transaction.id),
-    productId: t.integer().notNull().references(() => product.id),
+    transactionId: t.integer('transaction_id').notNull().references(() => transaction.id),
+    productId: t.integer('product_id').notNull().references(() => product.id),
     quantity: t.integer(),
 }, (table) => [
     t.primaryKey({ columns: [table.transactionId, table.productId] })
