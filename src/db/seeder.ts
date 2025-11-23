@@ -7,11 +7,18 @@ async function main() {
 
     await reset(db, schema)
     await seed(db, schema).refine((f) => ({
+        users: {
+            count: 0,
+        },
         product: {
             columns: {
                 productName: f.valuesFromArray({
                     values: ['Jackpot', '4 Players Jackpot', 'Jenga', 'Colorful Jenga', 'Domino', 'Tic Tac Toe', 'Ludo',],
                     isUnique: true,
+                }),
+                productQty: f.int({
+                    minValue: 1,
+                    maxValue: 100,
                 })
             },
             count: 7
@@ -79,4 +86,4 @@ async function main() {
     console.log("Seeding completed.");
 }
 
-await main();
+main();
