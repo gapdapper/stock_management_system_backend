@@ -16,11 +16,12 @@ export const users = pgTable("users", {
 
 export const product = pgTable("product", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-    productName: t.varchar('product_name'),
-    productSizeId: t.integer('product_size_id').references(() => productSize.id),
-    productColorId: t.integer('product_color_id').references(() => productColor.id),
-    productQty: t.integer('product_qty'),
-    updatedAt: t.timestamp('updated_at'),
+    productName: t.varchar('product_name').notNull(),
+    productSizeId: t.integer('product_size_id').references(() => productSize.id).notNull(),
+    productColorId: t.integer('product_color_id').references(() => productColor.id).notNull(),
+    productQty: t.integer('product_qty').notNull(),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
+    createdAt: t.timestamp('created_at').defaultNow().notNull(),
 })
 
 export const productSize = pgTable("product_size", {
