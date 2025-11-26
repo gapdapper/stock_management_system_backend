@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import authService from "@/services/authService";
+import * as authService from "@/services/authService";
 import BadRequestError from "@/utils/errors/bad-request";
 
 export const register = async (

@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import authRepository from '@/repositories/authRepository';
+import * as authRepository from '@/repositories/authRepository';
 import BadRequestError from '@/utils/errors/bad-request';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import UnauthorizedError from '@/utils/errors/unauthorized';
@@ -87,11 +87,3 @@ export const refreshToken = async (userId: number, refreshToken: string): Promis
 
   return newAccessToken;
 }
-
-
-export default {
-  registerUser,
-  loginUser,
-  logoutUser,
-  refreshToken,
-};

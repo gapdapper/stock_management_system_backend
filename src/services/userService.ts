@@ -1,4 +1,4 @@
-import authRepository from "@/repositories/authRepository";
+import * as authRepository from "@/repositories/authRepository";
 import BadRequestError from "@/utils/errors/bad-request";
 
 export const getUser = async (userId: number) => {
@@ -12,7 +12,3 @@ export const getUser = async (userId: number) => {
     }
     return user;
 }
-
-export default {
-    getUser,
-};

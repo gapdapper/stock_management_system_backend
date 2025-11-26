@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { errorHandler } from '@/middlewares/error-handler';
 import authRouter from '@/routes/authRoutes';
+import productRouter from '@/routes/productRoutes';
 import cookieParser from 'cookie-parser';
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.use(pinoHttp());
 
 // Routes
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/products', productRouter);
 
 // Error Handling Middleware
 app.use(errorHandler);

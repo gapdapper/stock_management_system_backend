@@ -43,11 +43,3 @@ export const removeRefreshToken = async (refreshToken: string): Promise<void> =>
     .set({ refreshToken: null })
     .where(eq(schema.users.refreshToken, refreshToken));
 }
-
-export default {
-  findUserByUsername,
-  addUser,
-  storeRefreshToken,
-  removeRefreshToken,
-  findUserById,
-};
