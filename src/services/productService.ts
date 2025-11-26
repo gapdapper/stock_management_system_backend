@@ -1,3 +1,4 @@
+import type { IProduct } from "@/models/product";
 import * as productRepository from "@/repositories/productRepository";
 import NotFoundError from "@/utils/errors/not-found";
 
@@ -25,7 +26,7 @@ export const getProductById = async (productId: number) => {
   return product;
 }
 
-export const editProduct = async (product: any) => {
+export const editProduct = async (product: IProduct) => {
   const updatedProduct = await productRepository.editProduct(product);
   if (!updatedProduct) {
     throw new NotFoundError({
@@ -37,7 +38,7 @@ export const editProduct = async (product: any) => {
   return updatedProduct;
 }
 
-export const addProduct = async (product: any) => {
+export const addProduct = async (product: IProduct) => {
   const newProduct = await productRepository.addProduct(product);
   if (!newProduct) {
     throw new Error("Failed to add new product");
