@@ -21,7 +21,7 @@ export const editProduct = async (product: any) => {
         productColorId: product.productColorId,
         productQty: product.productQty,
         updatedAt: new Date(),
-    }).where(eq(schema.product.id, product.id));
+    }).where(eq(schema.product.id, product.id)).returning();
     return result;
 }
 
