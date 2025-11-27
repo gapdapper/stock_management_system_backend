@@ -27,11 +27,15 @@ export const product = pgTable("product", {
 export const productSize = pgTable("product_size", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
     size: t.varchar(),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
+    createdAt: t.timestamp('created_at').defaultNow().notNull(),
 })
 
 export const productColor = pgTable("product_color", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
     color: t.varchar(),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
+    createdAt: t.timestamp('created_at').defaultNow().notNull(),
 })
 
 export const transaction = pgTable("transaction", {
@@ -50,16 +54,22 @@ export const transaction = pgTable("transaction", {
 export const paymentType = pgTable("payment_type", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
     paymentType: t.varchar('payment_type'),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
+    createdAt: t.timestamp('created_at').defaultNow().notNull(),
 })
 
 export const shippingProvider = pgTable("shipping_provider", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
     shippingProvider: t.varchar('shipping_provider'),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
+    createdAt: t.timestamp('created_at').defaultNow().notNull(),
 })
 
 export const platform = pgTable("platform", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
     platformName: t.varchar('platform_name'),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
+    createdAt: t.timestamp('created_at').defaultNow().notNull(),
 })
 
 export const transactionItem = pgTable("transaction_item", {
