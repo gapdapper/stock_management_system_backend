@@ -7,3 +7,10 @@ export interface IProduct {
     updatedAt?: Date;
     createdAt?: Date;
 }
+
+export interface IProductSize {
+    id?: number;
+    size: string;
+    updatedAt?: Date;
+    createdAt?: Date;
+}
