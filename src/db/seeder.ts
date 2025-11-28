@@ -1,3 +1,4 @@
+import '@/config/env';
 import db from "../db/connect"
 import { reset, seed } from "drizzle-seed";
 import * as schema from "../db/schema";
