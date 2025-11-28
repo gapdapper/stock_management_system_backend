@@ -1,13 +1,14 @@
 import express from 'express';
+import '@/config/env';
 import { pinoHttp } from 'pino-http';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import { errorHandler } from '@/middlewares/error-handler';
 import authRouter from '@/routes/authRoutes';
 import productRouter from '@/routes/productRoutes';
+import productColorRouter from '@/routes/productColorRoutes';
+import productSizeRouter from '@/routes/productSizeRoutes';
 import cookieParser from 'cookie-parser';
 
-dotenv.config();
 
 export const ENV = {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -34,6 +35,8 @@ app.use(pinoHttp());
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/products', productRouter);
+app.use('/api/v1/productColors', productColorRouter);
+app.use('/api/v1/productSizes', productSizeRouter);
 
 // Error Handling Middleware
 app.use(errorHandler);
