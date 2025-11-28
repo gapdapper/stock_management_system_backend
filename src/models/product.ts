@@ -14,3 +14,10 @@ export interface IProductSize {
     updatedAt?: Date;
     createdAt?: Date;
 }
+
+export interface IProductColor {
+    id?: number;
+    color: string;
+    updatedAt?: Date;
+    createdAt?: Date;
+}
