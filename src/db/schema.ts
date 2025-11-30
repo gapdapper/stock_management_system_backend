@@ -48,6 +48,7 @@ export const transaction = pgTable("transaction", {
     shippingPostalCode: t.varchar('shipping_postal_code'),
     platformId: t.integer('platform_id').references(() => platform.id),
     isPaid: t.boolean('is_paid').default(false),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
     createdAt: t.timestamp('created_at').defaultNow(),
 })
 

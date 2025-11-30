@@ -7,16 +7,8 @@ import authRouter from '@/routes/authRoutes';
 import productRouter from '@/routes/productRoutes';
 import productColorRouter from '@/routes/productColorRoutes';
 import productSizeRouter from '@/routes/productSizeRoutes';
+import transactionRouter from '@/routes/transactionRoutes';
 import cookieParser from 'cookie-parser';
-
-
-export const ENV = {
-    DATABASE_URL: process.env.DATABASE_URL,
-    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
-    ACCESS_TOKEN_EXPIRATION: process.env.ACCESS_TOKEN_EXPIRATION,
-    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
-    REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION,
-}
 
 const app = express();
 const PORT = 3000;
@@ -37,6 +29,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/productColors', productColorRouter);
 app.use('/api/v1/productSizes', productSizeRouter);
+app.use('/api/v1/transactions', transactionRouter);
 
 // Error Handling Middleware
 app.use(errorHandler);
