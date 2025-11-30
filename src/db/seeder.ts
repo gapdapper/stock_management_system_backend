@@ -3,6 +3,29 @@ import db from "../db/connect"
 import { reset, seed } from "drizzle-seed";
 import * as schema from "../db/schema";
 
+async function resetIdentitySequences() {
+    const tables = [
+        "users",
+        "product",
+        "product_size",
+        "product_color",
+        "payment_type",
+        "shipping_provider",
+        "platform",
+        "transaction",
+    ];
+
+    for (const table of tables) {
+        await db.execute(`
+            SELECT setval(
+                pg_get_serial_sequence('"${table}"', 'id'),
+                (SELECT max(id) FROM "${table}"));
+        `);
+    }
+
+    console.log("Identity sequences reset.");
+}
+
 async function main() {
     console.log("Seeding database...");
 
@@ -83,6 +106,7 @@ async function main() {
         { transactionId: 3, productId: 6, quantity: 2 },
         { transactionId: 4, productId: 7, quantity: 1 },
     ])
+    await resetIdentitySequences();
 
     console.log("Seeding completed.");
 }

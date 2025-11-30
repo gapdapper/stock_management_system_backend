@@ -48,6 +48,7 @@ export const transaction = pgTable("transaction", {
     shippingPostalCode: t.varchar('shipping_postal_code'),
     platformId: t.integer('platform_id').references(() => platform.id),
     isPaid: t.boolean('is_paid').default(false),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
     createdAt: t.timestamp('created_at').defaultNow(),
 })
 
@@ -76,6 +77,8 @@ export const transactionItem = pgTable("transaction_item", {
     transactionId: t.integer('transaction_id').notNull().references(() => transaction.id),
     productId: t.integer('product_id').notNull().references(() => product.id),
     quantity: t.integer(),
+    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
+    createdAt: t.timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
     t.primaryKey({ columns: [table.transactionId, table.productId] })
 ]);
