@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.get('/', getAllProductSizes);
 router.get('/:id', getProductSizeById);
-router.post('/addProductSize', addProductSize);
-router.patch('/editProductSize', editProductSize);
+router.post('/', addProductSize);
+router.patch('/:id', editProductSize);
 router.delete('/:id', deleteProductSize);
 
 export default router;

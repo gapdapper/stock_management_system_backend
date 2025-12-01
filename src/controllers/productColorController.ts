@@ -21,9 +21,11 @@ export const getProductColorById = async (req: Request, res: Response, next: Nex
 }
 
 export const editProductColor = async (req: Request, res: Response, next: NextFunction) => {
+    const productColorId = Number(req.params.id);
     const productColor = req.body;
+    const updatedProductColor = { ...productColor, id: productColorId };
     try {
-        const result = await productColorService.editProductColor(productColor);
+        const result = await productColorService.editProductColor(updatedProductColor);
         return res.status(200).json({ productColor: result });
     } catch (error) {
         next(error);

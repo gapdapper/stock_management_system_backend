@@ -21,9 +21,11 @@ export const getProductSizeById = async (req: Request, res: Response, next: Next
 }
 
 export const editProductSize = async (req: Request, res: Response, next: NextFunction) => {
+    const productSizeId = Number(req.params.id);
     const productSize = req.body;
+    const updatedProductSize = { ...productSize, id: productSizeId };
     try {
-        const result = await productSizeService.editProductSize(productSize);
+        const result = await productSizeService.editProductSize(updatedProductSize);
         return res.status(200).json({ productSize: result });
     } catch (error) {
         next(error);
