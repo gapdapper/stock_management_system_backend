@@ -21,9 +21,11 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
 }
 
 export const editProduct = async (req: Request, res: Response, next: NextFunction) => {
+    const productId = Number(req.params.id);
     const product = req.body;
+    const updatedProduct = { ...product, id: productId };
     try {
-        const result = await productService.editProduct(product);
+        const result = await productService.editProduct(updatedProduct);
         return res.status(200).json({ result });
     } catch (error) {
         next(error);
