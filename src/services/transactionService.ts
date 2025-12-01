@@ -1,6 +1,7 @@
 import NotFoundError from "@/utils/errors/not-found";
 import type { ITransaction, ITransactionItem } from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
+import * as XLSX from 'xlsx';
 
 // #region Transaction
 export const getAllTransactions = async () => {
@@ -118,5 +119,24 @@ export const deleteTransactionItem = async (
   productId: number
 ) => {
   await transactionRepository.deleteTransactionItem(transactionId, productId);
+};
+// #endregion
+
+// #region Transaction Upload
+export const processUploadedTransactionFiles = async (files: Express.Multer.File[]) => {
+    // Placeholder for processing logic
+    for (const file of files) {
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      if (workbook.SheetNames[0] === undefined) {
+        throw new Error('Uploaded spreadsheet contains no sheets');
+      }
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      if (worksheet === undefined) {
+        throw new Error('Failed to read the first sheet of the uploaded spreadsheet');
+      }
+      const rawData = XLSX.utils.sheet_to_json(worksheet);
+      console.log(rawData);
+      // Process rawData as needed, e.g., validate and store in the database
+    }
 };
 // #endregion
