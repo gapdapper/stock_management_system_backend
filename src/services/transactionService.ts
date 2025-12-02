@@ -1,7 +1,7 @@
 import NotFoundError from "@/utils/errors/not-found";
 import type { ITransaction, ITransactionItem } from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 
 // #region Transaction
 export const getAllTransactions = async () => {
@@ -108,9 +108,8 @@ export const editTransactionItem = async (
     productId,
     quantity,
   };
-  const updatedTransactionItem = await transactionRepository.editTransactionItem(
-    transactionItem
-  );
+  const updatedTransactionItem =
+    await transactionRepository.editTransactionItem(transactionItem);
   return updatedTransactionItem;
 };
 
@@ -123,20 +122,114 @@ export const deleteTransactionItem = async (
 // #endregion
 
 // #region Transaction Upload
-export const processUploadedTransactionFiles = async (files: Express.Multer.File[]) => {
-    // Placeholder for processing logic
-    for (const file of files) {
-      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-      if (workbook.SheetNames[0] === undefined) {
-        throw new Error('Uploaded spreadsheet contains no sheets');
-      }
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      if (worksheet === undefined) {
-        throw new Error('Failed to read the first sheet of the uploaded spreadsheet');
-      }
-      const rawData = XLSX.utils.sheet_to_json(worksheet);
-      console.log(rawData);
-      // Process rawData as needed, e.g., validate and store in the database
+export const processUploadedTransactionFiles = async (
+  files: Express.Multer.File[]
+) => {
+  // Placeholder for processing logic
+  for (const file of files) {
+    const workbook = XLSX.read(file.buffer, { type: "buffer" });
+    if (workbook.SheetNames[0] === undefined) {
+      throw new Error("Uploaded spreadsheet contains no sheets");
     }
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    if (worksheet === undefined) {
+      throw new Error(
+        "Failed to read the first sheet of the uploaded spreadsheet"
+      );
+    }
+    const headers = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1,
+    })[0] as string[];
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+
+    const signatureRules = [
+      {
+        provider: "shopee",
+        fileType: "return",
+        mustHave: ["เหตุผลในการยกเลิกคำสั่งซื้อ"],
+        keyColumns: [
+          "หมายเลขคำสั่งซื้อ",
+          "ชื่อผู้ใช้ (ผู้ซื้อ)",
+          "ช่องทางการชำระเงิน",
+          "ตัวเลือกการจัดส่ง",
+          "รหัสไปรษณีย์",
+          "เวลาการชำระสินค้า",
+          "เหตุผลในการยกเลิกคำสั่งซื้อ",
+          "ชื่อสินค้า",
+          "ชื่อตัวเลือก",
+          "จำนวน",
+        ],
+      },
+      {
+        provider: "shopee",
+        fileType: "order",
+        mustHave: ["Hot Listing"],
+        keyColumns: [
+          "หมายเลขคำสั่งซื้อ",
+          "ชื่อผู้ใช้ (ผู้ซื้อ)",
+          "ช่องทางการชำระเงิน",
+          "ตัวเลือกการจัดส่ง",
+          "รหัสไปรษณีย์",
+          "เวลาการชำระสินค้า",
+          "เหตุผลในการยกเลิกคำสั่งซื้อ",
+          "ชื่อสินค้า",
+          "ชื่อตัวเลือก",
+          "จำนวน",
+        ],
+      },
+      {
+        provider: "lazada",
+        fileType: "order",
+        mustHave: ["rtsSla", "ttsSla"],
+        keyColumns: [
+          "orderItemId",
+          "deliveryType",
+          "customerName",
+          "payMethod",
+          "shippingPostCode",
+          "paidPrice",
+          "itemName",
+          "variation",
+        ],
+      },
+      {
+        provider: "lazada",
+        fileType: "return",
+        mustHave: ["Return Item ID", "Return Order Date"],
+        keyColumns: ["Order ID", "buyerName", "Return Reason", "Item Name"],
+      },
+      {
+        provider: "tiktok",
+        fileType: "order",
+        mustHave: ["RTS Time"],
+        keyColumns: [
+          "Order ID",
+          "Buyer Username",
+          "Payment Method",
+          "Product Name",
+          "Variation",
+          "Quantity",
+        ],
+      },
+    ];
+
+    const detected = signatureRules.find((rule) =>
+      rule.mustHave.every((header) => headers.includes(header))
+    );
+
+    if (!detected) {
+      throw new Error("Unrecognized spreadsheet format");
+    }
+
+    const { provider, fileType } = detected;
+
+    const headerLookup: Record<string, number> = {};
+    headers.forEach((h, idx) => headerLookup[h] = idx);
+
+
+    for (const row of rawData) {
+      // Implement parsing and saving logic based on provider and fileType
+    }
+  }
 };
 // #endregion
