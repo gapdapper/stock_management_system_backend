@@ -41,13 +41,14 @@ export const productColor = pgTable("product_color", {
 export const transaction = pgTable("transaction", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
     orderId: t.varchar('order_id'),
-    buyerFirstName: t.varchar('buyer_first_name'),
-    buyerLastName: t.varchar('buyer_last_name'),
+    buyer: t.varchar('buyer'),
     paymentTypeId: t.integer('payment_type_id').references(() => paymentType.id),
-    shippingProviderId: t.integer('shipping_provider_id').references(() => shippingProvider.id),
+    shippingType: t.varchar('shipping_type'),
     shippingPostalCode: t.varchar('shipping_postal_code'),
     platformId: t.integer('platform_id').references(() => platform.id),
     isPaid: t.boolean('is_paid').default(false),
+    isReturned: t.boolean('is_returned').default(false),
+    note: t.varchar('note'),
     updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
     createdAt: t.timestamp('created_at').defaultNow(),
 })
@@ -55,13 +56,6 @@ export const transaction = pgTable("transaction", {
 export const paymentType = pgTable("payment_type", {
     id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
     paymentType: t.varchar('payment_type'),
-    updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
-    createdAt: t.timestamp('created_at').defaultNow().notNull(),
-})
-
-export const shippingProvider = pgTable("shipping_provider", {
-    id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-    shippingProvider: t.varchar('shipping_provider'),
     updatedAt: t.timestamp('updated_at').notNull().defaultNow(),
     createdAt: t.timestamp('created_at').defaultNow().notNull(),
 })

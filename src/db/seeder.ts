@@ -74,15 +74,6 @@ async function main() {
             },
             count: 4
         },
-        shippingProvider: {
-            columns: {
-                shippingProvider: f.valuesFromArray({
-                    values: ['DHL', 'Flash', 'JT', 'ThaiPost'],
-                    isUnique: true,
-                })
-            },
-            count: 4
-        },
         platform: {
             columns: {
                 platformName: f.valuesFromArray({
