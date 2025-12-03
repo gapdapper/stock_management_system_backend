@@ -159,6 +159,18 @@ export const processUploadedTransactionFiles = async (
           "ชื่อตัวเลือก",
           "จำนวน",
         ],
+        normalizedColumns: {
+          orderId: "หมายเลขคำสั่งซื้อ",
+          buyerUsername: "ชื่อผู้ใช้ (ผู้ซื้อ)",
+          paymentMethod: "ช่องทางการชำระเงิน",
+          shippingOption: "ตัวเลือกการจัดส่ง",
+          postalCode: "รหัสไปรษณีย์",
+          paidTime: "เวลาการชำระสินค้า",
+          cancelReason: "เหตุผลในการยกเลิกคำสั่งซื้อ",
+          productName: "ชื่อสินค้า",
+          variation: "ชื่อตัวเลือก",
+          quantity: "จำนวน",
+        },
       },
       {
         provider: "shopee",
@@ -176,6 +188,18 @@ export const processUploadedTransactionFiles = async (
           "ชื่อตัวเลือก",
           "จำนวน",
         ],
+        normalizedColumns: {
+          orderId: "หมายเลขคำสั่งซื้อ",
+          buyerUsername: "ชื่อผู้ใช้ (ผู้ซื้อ)",
+          paymentMethod: "ช่องทางการชำระเงิน",
+          shippingOption: "ตัวเลือกการจัดส่ง",
+          postalCode: "รหัสไปรษณีย์",
+          paidTime: "เวลาการชำระสินค้า",
+          cancelReason: "เหตุผลในการยกเลิกคำสั่งซื้อ",
+          productName: "ชื่อสินค้า",
+          variation: "ชื่อตัวเลือก",
+          quantity: "จำนวน",
+        },
       },
       {
         provider: "lazada",
@@ -191,12 +215,28 @@ export const processUploadedTransactionFiles = async (
           "itemName",
           "variation",
         ],
+        normalizedColumns: {
+          orderItemId: "orderItemId",
+          deliveryType: "deliveryType",
+          customerName: "customerName",
+          payMethod: "payMethod",
+          shippingPostCode: "shippingPostCode",
+          paidPrice: "paidPrice",
+          itemName: "itemName",
+          variation: "variation",
+        },
       },
       {
         provider: "lazada",
         fileType: "return",
         mustHave: ["Return Item ID", "Return Order Date"],
         keyColumns: ["Order ID", "buyerName", "Return Reason", "Item Name"],
+        normalizedColumns: {
+          orderId: "Order ID",
+          buyerName: "buyerName",
+          returnReason: "Return Reason",
+          itemName: "Item Name",
+        },
       },
       {
         provider: "tiktok",
@@ -210,8 +250,17 @@ export const processUploadedTransactionFiles = async (
           "Variation",
           "Quantity",
         ],
+        normalizedColumns: {
+          orderId: "Order ID",
+          buyerUsername: "Buyer Username",
+          paymentMethod: "Payment Method",
+          productName: "Product Name",
+          variation: "Variation",
+          quantity: "Quantity",
+        },
       },
     ];
+
 
     const detected = signatureRules.find((rule) =>
       rule.mustHave.every((header) => headers.includes(header))
@@ -228,7 +277,22 @@ export const processUploadedTransactionFiles = async (
 
 
     for (const row of rawData) {
-      // Implement parsing and saving logic based on provider and fileType
+      let result: Record<string, any> = {};
+      const index = signatureRules.findIndex(r => r.provider === detected.provider && r.fileType === detected.fileType);
+
+      for (const key of detected.keyColumns) {
+        const index = headerLookup[key];
+        result[key] = index !== undefined ? (row as any)[key] : null;
+      }
+      
+      const map = signatureRules[index]?.normalizedColumns!;
+      const normalizedResult: Record<string, any> = {};
+
+      for (const [key, value] of Object.entries(map)) {
+        normalizedResult[key] = result[value];
+      }
+
+      console.log("Normalized Result:", normalizedResult);
     }
   }
 };
