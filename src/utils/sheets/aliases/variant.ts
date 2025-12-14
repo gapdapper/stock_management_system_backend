@@ -1,64 +1,81 @@
 export const SizeAliases = [
-    {
-        id: 1,
-        variant: "Size S",
-        pattern: ["S", "size S", "ขนาด S", "ไซส์ S"],
-    },
-    {
-        id: 2,
-        variant: "Size M",
-        pattern: ["M", "size M", "ขนาด M", "ไซส์ M"],
-    },
-    {
-        id: 3,
-        variant: "Size L",
-        pattern: ["L" , "size L", "ขนาด L", "ไซส์ L"],
-    },
-    {
-        id: 4,
-        variant: "Size XL",
-        pattern: ["XL", "size XL", "ขนาด XL", "ไซส์ XL"],
-    },
-    {
-        id: 5,
-        variant: "No Size",
-        pattern: [],
-    },
-]
+  {
+    id: 1,
+    variant: "Size S",
+  },
+  {
+    id: 2,
+    variant: "Size M",
+  },
+  {
+    id: 3,
+    variant: "Size L",
+  },
+  {
+    id: 4,
+    variant: "Size XL",
+  },
+  {
+    id: 5,
+    variant: "No Size",
+  },
+];
 
 export const ColorAliases = [
-    {
-        id: 1,
-        variant: "Red",
-        pattern: ["Red", "สีแดง", "แดง"],
-    },
-    {
-        id: 2,
-        variant: "Blue",
-        pattern: ["Blue", "สีน้ำเงิน", "น้ำเงิน"],
-    },
-    {
-        id: 3,
-        variant: "Green",
-        pattern: ["Green", "สีเขียว", "เขียว"],
-    },
-    {
-        id: 4,
-        variant: "Orange",
-        pattern: ["Orange", "สีส้ม", "ส้ม"],
-    },
-    {
-        id: 5,
-        variant: "Red-White",
-        pattern: ["แดง-ขาว", "แดง ขาว"],
-    },
-    {
-        id: 6,
-        variant: "Black-White",
-        pattern: ["ดำ-ขาว", "ดำ ขาว"],
-    },
-    {
-        id: 7, variant: "No Color",
-        pattern: [],
-    }
-]
+  {
+    id: 1,
+    variant: "Red",
+  },
+  {
+    id: 2,
+    variant: "Blue",
+  },
+  {
+    id: 3,
+    variant: "Green",
+  },
+  {
+    id: 4,
+    variant: "Orange",
+  },
+  {
+    id: 5,
+    variant: "Red-White",
+  },
+  {
+    id: 6,
+    variant: "Black-White",
+  },
+  {
+    id: 7,
+    variant: "New Red",
+  },
+  {
+    id: 8,
+    variant: "New Green",
+  },
+  {
+    id: 9,
+    variant: "Colorful",
+  },
+  {
+    id: 10,
+    variant: "6-point",
+  },
+  {
+    id: 11,
+    variant: "9-point",
+  },
+  {
+    id: 12,
+    variant: "12-point",
+  },
+  {
+    id: 13,
+    variant: "White",
+  },
+  {
+    id: 14,
+    variant: "No Color",
+  },
+];
