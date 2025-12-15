@@ -90,10 +90,9 @@ const colors = [
 const platforms = ["Shopee", "Lazada", "TikTok Shop"];
 const paymentTypes = [
   "Credit Card",
-  "Debit Card",
-  "COD",
   "Bank Transfer",
   "Promptpay",
+  "COD",
   "TMN Express",
   "Shopee Wallet",
   "Airpay Wallet",

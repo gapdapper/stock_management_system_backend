@@ -51,9 +51,9 @@ export const ShopeeProductPattern = [
     },
     externalVariant: {
       colorPatterns: [
-        { colorId: 5, color: "6-point", patterns: [/6\s*(point|pt|จุด)\b/i] },
-        { colorId: 6, color: "9-point", patterns: [/9\s*(point|pt|จุด)\b/i] },
-        { colorId: 7, color: "12-point", patterns: [/12\s*(point|pt|จุด)\b/i] },
+        { colorId: 10, color: "6-point", patterns: [/6\s*(point|pt|จุด)\b/i] },
+        { colorId: 11, color: "9-point", patterns: [/9\s*(point|pt|จุด)\b/i] },
+        { colorId: 12, color: "12-point", patterns: [/12\s*(point|pt|จุด)\b/i] },
       ],
       sizePatterns: [
         {

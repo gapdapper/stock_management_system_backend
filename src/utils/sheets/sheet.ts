@@ -135,9 +135,8 @@ export function lookupPaymentTypeId(rawPaymentType: string): number {
   const cleanRawPaymentType = rawPaymentType.trim().toLowerCase();
   for (const p of PaymentTypeAliases) {
     for (const alias of p.pattern) {
-      const regex = new RegExp(`(${alias})`, "g");
-      if (!alias) continue;
-      if (regex.test(cleanRawPaymentType)) {
+      const matched = alias.test(cleanRawPaymentType);
+      if (matched) {
         return p.id;
       }
     }
