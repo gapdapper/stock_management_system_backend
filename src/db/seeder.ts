@@ -67,6 +67,9 @@ const productNames = [
   "Draught Board with Thai Chess Pieces",
   "Super Combo Chess (English & Thai) V.3",
   "Connect Four V.2",
+  "3 in 1 Magnetic Board Game (Backgammon + Chess + Checkers)",
+  "Heart Tangram Puzzle",
+  "Chess Set 4 in 1"
 ];
 
 // ข้อมูล Master Data อื่นๆ ที่ควรเรียงลำดับ ID
@@ -113,7 +116,7 @@ const productSeederConfig = [
   },
   {
     id: 2,
-    allowedColors: [5, 6, 7, 14],
+    allowedColors: [10, 11, 12, 14],
     allowedSizes: [1, 5, 3],
   },
   { id: 3, allowedColors: [14], allowedSizes: [5] },
@@ -175,6 +178,9 @@ const productSeederConfig = [
   { id: 59, allowedColors: [14], allowedSizes: [4] },
   { id: 60, allowedColors: [14], allowedSizes: [5] },
   { id: 61, allowedColors: [14], allowedSizes: [5] },
+  { id: 62, allowedColors: [14], allowedSizes: [5] },
+  { id: 63, allowedColors: [14], allowedSizes: [5] },
+  { id: 64, allowedColors: [14], allowedSizes: [5] },
 ];
 
 export function buildProductVariants() {

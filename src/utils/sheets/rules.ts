@@ -118,6 +118,7 @@ export const SignatureRules = [
       "Product Name",
       "Variation",
       "Quantity",
+      "Cancelation/Return Type",
     ],
     normalizedColumns: {
       orderId: "Order ID",
@@ -126,7 +127,7 @@ export const SignatureRules = [
       shippingOption: "-",
       postalCode: "-",
       paidTime: "-",
-      cancelReason: "-",
+      cancelReason: "Cancelation/Return Type",
       productName: "Product Name",
       variation: "Variation",
       quantity: "Quantity",
