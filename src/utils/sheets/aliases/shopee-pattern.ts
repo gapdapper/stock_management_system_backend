@@ -53,7 +53,11 @@ export const ShopeeProductPattern = [
       colorPatterns: [
         { colorId: 10, color: "6-point", patterns: [/6\s*(point|pt|จุด)\b/i] },
         { colorId: 11, color: "9-point", patterns: [/9\s*(point|pt|จุด)\b/i] },
-        { colorId: 12, color: "12-point", patterns: [/12\s*(point|pt|จุด)\b/i] },
+        {
+          colorId: 12,
+          color: "12-point",
+          patterns: [/12\s*(point|pt|จุด)\b/i],
+        },
       ],
       sizePatterns: [
         {
@@ -72,7 +76,8 @@ export const ShopeeProductPattern = [
             /(^|[^0-9])L($|[^0-9])/i,
           ],
         },
-        { sizeId: 5, size: "No Size", patterns: [] },
+        // special case for No Size
+        { sizeId: 5, size: "No Size", patterns: [/12\s*(point|pt|จุด)\b/i] },
       ],
     },
   },
@@ -812,7 +817,7 @@ export const ShopeeProductPattern = [
   {
     productId: 47,
     productName: "Super Combo Chess (English & Thai)",
-    priority: 100,
+    priority: 80,
     aliases: [/super combo chess \(english & thai\)/i],
     inlineVariant: {
       colorPatterns: [],

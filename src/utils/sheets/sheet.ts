@@ -1,5 +1,7 @@
+import { LazadaProductPattern } from "./aliases/lazada-pattern";
 import { PaymentTypeAliases } from "./aliases/payment";
 import { ShopeeProductPattern } from "./aliases/shopee-pattern";
+import { TikTokProductPattern } from "./aliases/tiktok-patternt";
 
 // #region variant/product finder
 export function variantIdFinder(
@@ -122,8 +124,14 @@ export function platformMapper(rawPlatform: string): any {
       id: 1,
       productPattern: ShopeeProductPattern,
     },
-    lazada: 2,
-    tiktok: 3,
+    lazada: {
+      id: 2,
+      productPattern: LazadaProductPattern,
+    },
+    tiktok: {
+      id: 3,
+      productPattern: TikTokProductPattern,
+    },
   };
   return mapping[rawPlatform] || 1;
 }
