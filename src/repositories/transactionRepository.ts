@@ -1,5 +1,6 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
+import type { TransactionStatus } from "@/models/transaction";
 import { and, eq } from "drizzle-orm";
 
 // #region Transaction
@@ -15,6 +16,13 @@ export const getTransactionById = async (transactionId: number) => {
     return transaction;
 }
 
+export const getTransactionByOrderId = async (orderId: string) => {
+    const transaction = await db.query.transaction.findFirst({
+        where: eq(schema.transaction.orderId, orderId),
+    });
+    return transaction;
+}
+
 export const editTransaction = async (transaction: any) => {
     const result = await db.update(schema.transaction).set({
         orderId: transaction.orderId,
@@ -22,9 +30,17 @@ export const editTransaction = async (transaction: any) => {
         paymentTypeId: transaction.paymentTypeId,
         shippingPostalCode: transaction.shippingPostalCode,
         platformId: transaction.platformId,
-        isPaid: transaction.isPaid,
+        status: transaction.status,
         updatedAt: new Date(),
     }).where(eq(schema.transaction.id, transaction.id)).returning();
+    return result;
+}
+
+export const editTransactionStatus = async (orderId: string, status: TransactionStatus) => {
+    const result = await db.update(schema.transaction).set({
+        status: status,
+        updatedAt: new Date(),
+    }).where(eq(schema.transaction.orderId, orderId)).returning();
     return result;
 }
 

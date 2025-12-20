@@ -1,6 +1,6 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export const getAllProductVariants = async () => {
     const productVariants = await db.query.productVariant.findMany();
@@ -23,4 +23,13 @@ export const getProductVariantByProductIdColorIdSizeId = async (productId: numbe
         )
     });
     return productVariant;
+}
+
+export const updateProductVariantQuantity = async (productVariantId: number, quantityChange: number) => {
+    // accept both positive and negative quantityChange
+    const result = await db.update(schema.productVariant).set({
+        qty: sql`${schema.productVariant.qty} + ${quantityChange}`,
+        updatedAt: new Date(),
+    }).where(eq(schema.productVariant.id, productVariantId)).returning();
+    return result;
 }
