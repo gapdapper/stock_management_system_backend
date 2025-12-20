@@ -1,3 +1,4 @@
+import type { TransactionStatus } from "@/models/transaction";
 import { LazadaProductPattern } from "./aliases/lazada-pattern";
 import { PaymentTypeAliases } from "./aliases/payment";
 import { ShopeeProductPattern } from "./aliases/shopee-pattern";
@@ -135,6 +136,35 @@ export function platformMapper(rawPlatform: string): any {
   };
   return mapping[rawPlatform] || 1;
 }
+
+export function statusMapper(rawStatus: string, provider: string): TransactionStatus {
+  if (provider === "shopee") {
+    const statusMapping: Record<string, string> = {
+      "สำเร็จแล้ว": "completed",
+      "จัดส่งสำเร็จแล้ว": "delivered",
+      "ยกเลิกแล้ว": "cancelled",
+      "การจัดส่ง": "shipped",
+      "ที่ต้องจัดส่ง": "order placed",
+    };
+    if (rawStatus.startsWith("ผู้ซื้อได้รับสินค้าแล้ว")) return "delivered";
+    return statusMapping[rawStatus as string] as TransactionStatus || "order placed";
+  }
+
+  if (provider === "lazada") {
+        const statusMapping: Record<string, string> = {
+      "confirmed": "completed",
+      "delivered": "delivered",
+      "ยกเลิกแล้ว": "cancelled",
+      "shipped": "shipped",
+      "pending": "order placed",
+    };
+
+    return statusMapping[rawStatus as string] as TransactionStatus || "order placed";
+  }
+
+  return "order placed";
+}
+
 // #endregion mapper
 
 // #region payment type finder

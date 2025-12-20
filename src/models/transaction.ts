@@ -5,8 +5,7 @@ export interface ITransaction {
     paymentTypeId: number;
     shippingPostalCode: string;
     platformId: number;
-    isPaid: boolean;
-    isReturned: boolean;
+    status: TransactionStatus;
     note: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -21,3 +20,5 @@ export interface ITransactionItem {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export type TransactionStatus = 'order placed' | 'shipped' | 'delivered' | 'returned' | 'cancelled' | 'completed';

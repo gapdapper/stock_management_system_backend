@@ -3,6 +3,8 @@ import * as t from "drizzle-orm/pg-core";
 
 export const roles = t.pgEnum("roles", ["admin", "user", "manager"]);
 
+export const status = t.pgEnum("status", ["order placed", "shipped", "delivered", "completed", "cancelled", "returned"]);
+
 export const users = pgTable("users", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   username: t.varchar().notNull(),
@@ -50,13 +52,12 @@ export const productColor = pgTable("product_color", {
 
 export const transaction = pgTable("transaction", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-  orderId: t.varchar("order_id"),
+  orderId: t.varchar("order_id").notNull().unique(),
   buyer: t.varchar("buyer"),
   paymentTypeId: t.integer("payment_type_id").references(() => paymentType.id),
   shippingPostalCode: t.varchar("shipping_postal_code"),
   platformId: t.integer("platform_id").references(() => platform.id),
-  isPaid: t.boolean("is_paid").default(false),
-  isReturned: t.boolean("is_returned").default(false),
+  status: status().notNull().default("order placed"),
   note: t.varchar("note"),
   updatedAt: t.timestamp("updated_at").notNull().defaultNow(),
   createdAt: t.timestamp("created_at").defaultNow(),
