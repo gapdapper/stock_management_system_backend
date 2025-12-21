@@ -13,6 +13,9 @@ export const getTransaction = async (req: Request, res: Response, next: NextFunc
 
 export const getTransactionById = async (req: Request, res: Response, next: NextFunction) => {
     const transactionId = Number(req.params.id);
+    if (isNaN(transactionId)) {
+        return res.status(400).json({ message: 'Invalid transactionId' });
+    }
     try {
         const result = await transactionService.getTransactionById(transactionId);
         return res.status(200).json({ transaction: result });
@@ -23,6 +26,9 @@ export const getTransactionById = async (req: Request, res: Response, next: Next
 
 export const addTransaction = async (req: Request, res: Response, next: NextFunction) => {
     const transaction = req.body;
+    if (!transaction) {
+        return res.status(400).json({ message: 'Invalid transaction data' });
+    }
     try {
         const newTransaction = await transactionService.addTransaction(transaction);
         return res.status(201).json({ transaction: newTransaction });
@@ -33,6 +39,9 @@ export const addTransaction = async (req: Request, res: Response, next: NextFunc
 
 export const editTransaction = async (req: Request, res: Response, next: NextFunction) => {
     const transactionId = Number(req.params.id);
+    if (isNaN(transactionId)) {
+        return res.status(400).json({ message: 'Invalid transactionId' });
+    }
     const transaction = { ...req.body, id: transactionId };
     try {
         const updatedTransaction = await transactionService.editTransaction(transaction);
@@ -44,6 +53,9 @@ export const editTransaction = async (req: Request, res: Response, next: NextFun
 
 export const deleteTransaction = async (req: Request, res: Response, next: NextFunction) => {
     const transactionId = Number(req.params.id);
+    if (isNaN(transactionId)) {
+        return res.status(400).json({ message: 'Invalid transactionId' });
+    }
     try {
         await transactionService.deleteTransaction(transactionId);
         return res.status(200).json({ status: 'resource deleted successfully' });
@@ -56,6 +68,9 @@ export const deleteTransaction = async (req: Request, res: Response, next: NextF
 // #region Transaction Item
 export const getTransactionItemsById = async (req: Request, res: Response, next: NextFunction) => {
     const transactionId = Number(req.params.transactionId);
+    if (isNaN(transactionId)) {
+        return res.status(400).json({ message: 'Invalid transactionId' });
+    }
     try {
         const items = await transactionService.getTransactionItemsById(transactionId);
         return res.status(200).json({ transactionItems: items });
@@ -66,10 +81,12 @@ export const getTransactionItemsById = async (req: Request, res: Response, next:
 
 export const addTransactionItem = async (req: Request, res: Response, next: NextFunction) => {
     const transactionId = Number(req.params.transactionId);
-    const { itemId, quantity } = req.body;
-    
+    const { itemId, productVariantId, quantity } = req.body;
+    if (isNaN(transactionId) || isNaN(itemId)) {
+        return res.status(400).json({ message: 'Invalid transactionId or itemId' });
+    }
     try {
-        const newTransactionItem = await transactionService.addTransactionItem(transactionId, itemId, quantity);
+        const newTransactionItem = await transactionService.addTransactionItem(transactionId, itemId, productVariantId, quantity);
         return res.status(201).json({ transactionItem: newTransactionItem });
     } catch (error) {
         next(error);
@@ -79,9 +96,13 @@ export const addTransactionItem = async (req: Request, res: Response, next: Next
 export const editTransactionItem = async (req: Request, res: Response, next: NextFunction) => {
     const transactionId = Number(req.params.transactionId);
     const itemId = Number(req.params.id);
+    const productVariantId = Number(req.body.productVariantId);
     const quantity = req.body.quantity;
+    if (isNaN(transactionId) || isNaN(itemId)) {
+        return res.status(400).json({ message: 'Invalid transactionId or itemId' });
+    }
     try {
-        const updatedTransactionItem = await transactionService.editTransactionItem(transactionId, itemId, quantity);
+        const updatedTransactionItem = await transactionService.editTransactionItem(transactionId, itemId, productVariantId, quantity);
         return res.status(200).json({ transactionItem: updatedTransactionItem });
     } catch (error) {
         next(error);
@@ -91,9 +112,28 @@ export const editTransactionItem = async (req: Request, res: Response, next: Nex
 export const deleteTransactionItem = async (req: Request, res: Response, next: NextFunction) => {
     const transactionId = Number(req.params.transactionId);
     const productId = Number(req.params.id);
+    const productVariantId = Number(req.body.productVariantId);
+    if (isNaN(transactionId) || isNaN(productId)) {
+        return res.status(400).json({ message: 'Invalid transactionId or productId' });
+    }
     try {
-        await transactionService.deleteTransactionItem(transactionId, productId);
+        await transactionService.deleteTransactionItem(transactionId, productId, productVariantId);
         return res.status(200).json({ status: 'resource deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+}
+// #endregion
+
+// #region Transaction Upload
+export const uploadTransactions = async (req: Request, res: Response, next: NextFunction) => {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded' });
+    }
+    try {
+        await transactionService.processUploadedTransactionFiles(files);
+        res.status(200).json({ message: 'Files processed successfully' });
     } catch (error) {
         next(error);
     }

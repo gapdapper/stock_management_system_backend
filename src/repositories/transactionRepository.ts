@@ -1,5 +1,6 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
+import type { TransactionStatus } from "@/models/transaction";
 import { and, eq } from "drizzle-orm";
 
 // #region Transaction
@@ -15,24 +16,42 @@ export const getTransactionById = async (transactionId: number) => {
     return transaction;
 }
 
+export const getTransactionByOrderId = async (orderId: string) => {
+    const transaction = await db.query.transaction.findFirst({
+        where: eq(schema.transaction.orderId, orderId),
+    });
+    return transaction;
+}
+
 export const editTransaction = async (transaction: any) => {
     const result = await db.update(schema.transaction).set({
         orderId: transaction.orderId,
-        buyerFirstName: transaction.buyerFirstName,
-        buyerLastName: transaction.buyerLastName,
+        buyer: transaction.buyer,
         paymentTypeId: transaction.paymentTypeId,
-        shippingProviderId: transaction.shippingProviderId,
         shippingPostalCode: transaction.shippingPostalCode,
         platformId: transaction.platformId,
-        isPaid: transaction.isPaid,
+        status: transaction.status,
         updatedAt: new Date(),
     }).where(eq(schema.transaction.id, transaction.id)).returning();
     return result;
 }
 
+export const editTransactionStatus = async (orderId: string, status: TransactionStatus) => {
+    const result = await db.update(schema.transaction).set({
+        status: status,
+        updatedAt: new Date(),
+    }).where(eq(schema.transaction.orderId, orderId)).returning();
+    return result;
+}
+
 export const addTransaction = async (transaction: any) => {
-    const result = await db.insert(schema.transaction).values(transaction).returning();
+    const result = await db.insert(schema.transaction).values(transaction).returning({ insertedId: schema.transaction.id, orderId: schema.transaction.orderId });
     return result[0];
+}
+
+export const addMultipleTransactions = async (transactions: any[]) => {
+    const result = await db.insert(schema.transaction).values(transactions).returning({ insertedId: schema.transaction.id, orderId: schema.transaction.orderId });
+    return result;
 }
 
 export const deleteTransaction = async (transactionId: number) => {
@@ -55,6 +74,11 @@ export const addTransactionItem = async (transactionItem: any) => {
     return result[0];
 }
 
+export const addMultipleTransactionItems = async (transactionItems: any[]) => {
+    const result = await db.insert(schema.transactionItem).values(transactionItems).returning();
+    return result;
+}
+
 export const editTransactionItem = async (transactionItem: any) => {
     const result = await db.update(schema.transactionItem).set({
         quantity: transactionItem.quantity,
@@ -63,6 +87,6 @@ export const editTransactionItem = async (transactionItem: any) => {
     return result;
 }
 
-export const deleteTransactionItem = async (transactionId: number, productId: number) => {
-    await db.delete(schema.transactionItem).where(and(eq(schema.transactionItem.transactionId, transactionId), eq(schema.transactionItem.productId, productId)));
+export const deleteTransactionItem = async (transactionId: number, productId: number, productVariantId: number) => {
+    await db.delete(schema.transactionItem).where(and(eq(schema.transactionItem.transactionId, transactionId), eq(schema.transactionItem.productId, productId), eq(schema.transactionItem.productVariantId, productVariantId)));
 }
