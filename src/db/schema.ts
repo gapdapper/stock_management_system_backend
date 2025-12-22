@@ -98,3 +98,8 @@ export const transactionItem = pgTable(
     createdAt: t.timestamp("created_at").defaultNow().notNull(),
   },
 );
+
+export const dailyUploadLog = pgTable("daily_upload_log", {
+  id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+  uploadAt: t.timestamp("upload_at").notNull(),
+});

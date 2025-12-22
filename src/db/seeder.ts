@@ -266,15 +266,10 @@ async function main() {
     .insert(schema.paymentType)
     .values(paymentTypes.map((pt) => ({ paymentType: pt })));
 
-  //   await db.insert(schema.transactionItem).values([
-  //     { transactionId: 1, productId: 1, quantity: 2 },
-  //     { transactionId: 1, productId: 2, quantity: 1 },
-  //     { transactionId: 2, productId: 3, quantity: 1 },
-  //     { transactionId: 2, productId: 4, quantity: 4 },
-  //     { transactionId: 3, productId: 5, quantity: 2 },
-  //     { transactionId: 3, productId: 6, quantity: 2 },
-  //     { transactionId: 4, productId: 7, quantity: 1 },
-  //   ]);
+  await db.insert(schema.dailyUploadLog).values(
+    { uploadAt: new Date()}
+  );
+
   await resetIdentitySequences();
 
   console.log("Seeding completed.");
