@@ -8,7 +8,9 @@ import productRouter from '@/routes/productRoutes';
 import productColorRouter from '@/routes/productColorRoutes';
 import productSizeRouter from '@/routes/productSizeRoutes';
 import transactionRouter from '@/routes/transactionRoutes';
+import webhookRouter from '@/routes/webhookRoutes';
 import cookieParser from 'cookie-parser';
+import {startDailyUploadNotifyJob} from '@/cron/dailyUploadNotify';
 
 const app = express();
 const PORT = 3000;
@@ -24,12 +26,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(pinoHttp());
 
+// Start the daily upload notification job
+startDailyUploadNotifyJob();
+
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/productColors', productColorRouter);
 app.use('/api/v1/productSizes', productSizeRouter);
 app.use('/api/v1/transactions', transactionRouter);
+app.use('/api/v1/webhooks', webhookRouter);
 
 // Error Handling Middleware
 app.use(errorHandler);

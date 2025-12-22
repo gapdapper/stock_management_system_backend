@@ -2,6 +2,7 @@ import NotFoundError from "@/utils/errors/not-found";
 import type { ITransaction, ITransactionItem } from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
+import * as dailyUploadLogRepository from "@/repositories/dailyUploadLogRepository";
 import * as XLSX from "xlsx";
 import {
   cleanSheetData,
@@ -346,6 +347,9 @@ export const processUploadedTransactionFiles = async (
         iq.quantity
       );
     }
+
+    // log the upload
+    await dailyUploadLogRepository.updateDailyUploadLog(new Date());
   } catch (error) {
     console.error("Error processing uploaded transaction files:", error);
     throw error;
