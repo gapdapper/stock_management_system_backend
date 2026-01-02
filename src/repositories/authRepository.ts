@@ -1,6 +1,6 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
-import type { IUser } from "@/models/user";
+import type { IRefreshToken, IUser } from "@/models/user";
 import { eq } from "drizzle-orm";
 
 export const findUserByUsername = async (username: string): Promise<IUser | undefined> => {
@@ -30,16 +30,46 @@ export const addUser = async (user: IUser): Promise<{ id: number }> => {
   return result[0]!;
 };
 
-export const storeRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {
-  await db
-    .update(schema.users)
-    .set({ refreshToken: refreshToken })
-    .where(eq(schema.users.id, userId));
+export const findRefreshToken = async (token: string): Promise<IRefreshToken | undefined> => {
+  const refreshTokenRecord = await db.query.refreshTokens.findFirst({
+    where: eq(schema.refreshTokens.token, token),
+  });
+  return refreshTokenRecord;
 }
 
-export const removeRefreshToken = async (refreshToken: string): Promise<void> => {
+export const revokeRefreshToken = async (id: number): Promise<void> => {
+  await db.delete(schema.refreshTokens).where(eq(schema.refreshTokens.id, id));
+}
+
+export const revokeRefreshTokenByHashed = async (tokenHash: string): Promise<void> => {
+  await db.delete(schema.refreshTokens).where(eq(schema.refreshTokens.token, tokenHash));
+}
+
+export const upsertRefreshToken = async (refreshTokenRecord: IRefreshToken): Promise<void> => {
+  const { userId, token, expiresAt } = refreshTokenRecord;
   await db
-    .update(schema.users)
-    .set({ refreshToken: null })
-    .where(eq(schema.users.refreshToken, refreshToken));
+    .insert(schema.refreshTokens)
+    .values({
+      userId,
+      token,
+      expiresAt,
+    })
+    .onConflictDoUpdate({
+      target: schema.refreshTokens.userId,
+      set: {
+        token,
+        expiresAt,
+      },
+    });
+}
+
+export const updateRefreshToken = async (refreshTokenRecord: IRefreshToken): Promise<void> => {
+  const { userId, token, expiresAt } = refreshTokenRecord;
+  await db
+    .update(schema.refreshTokens)
+    .set({
+      token,
+      expiresAt,
+    })
+    .where(eq(schema.refreshTokens.userId, userId));
 }

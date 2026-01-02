@@ -9,10 +9,17 @@ export const users = pgTable("users", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   username: t.varchar().notNull(),
   password: t.varchar().notNull(),
-  refreshToken: t.varchar("refresh_token"),
   role: roles().notNull(),
   firstName: t.varchar("first_name").notNull(),
   lastName: t.varchar("last_name").notNull(),
+  createdAt: t.timestamp("created_at").defaultNow(),
+});
+
+export const refreshTokens = pgTable("refresh_tokens", {
+  id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+  userId: t.integer("user_id").notNull().references(() => users.id).unique(),
+  token: t.varchar().notNull(),
+  expiresAt: t.timestamp("expires_at").notNull(),
   createdAt: t.timestamp("created_at").defaultNow(),
 });
 

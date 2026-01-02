@@ -30,8 +30,12 @@ export const register = async (
   }
 };
 
-export const login = async (req: Request, res: Response, next: NextFunction) => {
-  const {username, password} = req.body;
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { username, password } = req.body;
   try {
     if (!username || !password) {
       throw new BadRequestError({
@@ -40,29 +44,33 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         logging: true,
       });
     }
-    const { accessToken, refreshToken } = await authService.loginUser({username, password});
-
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: Number(process.env.ACCESS_TOKEN_COOKIE_MAX_AGE),  // 15 minutes in mileseconds
-      sameSite: "strict",
-    })
+    const { accessToken, refreshToken } = await authService.loginUser({
+      username,
+      password,
+    });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE),  // 24 hours is mileseconds
+      maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE), // 24 hours is mileseconds
       sameSite: "strict",
-    })
+    });
 
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json({
+      accessToken,
+      message: "Login successful",
+    });
   } catch (error) {
+    console.error("Login error:", error);
     next(error);
   }
-}
+};
 
-export const logout = async (req: Request, res: Response, next: NextFunction) => {
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   console.log("Cookies before clearing:", req.cookies);
   const { refreshToken } = req.cookies;
 
@@ -71,29 +79,36 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
   }
 
   await authService.logoutUser(refreshToken);
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
 
   return res.status(200).json({ message: "Logout successful" });
-}
+};
 
-
-export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
-  const userId = (req as any).userId;
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const refreshToken = req.cookies.refreshToken;
 
-  if (!userId || !refreshToken) {
+  if (!refreshToken) {
     return res.status(401).json({ message: "Refresh token not provided" });
   }
 
-  const newAccessToken = await authService.refreshToken(userId, refreshToken);
+  const { newAccessToken, newRefreshToken } = await authService.refreshToken(
+    refreshToken
+  );
 
-  res.cookie("accessToken", newAccessToken, {
+  res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: Number(process.env.ACCESS_TOKEN_COOKIE_MAX_AGE),
     sameSite: "strict",
-  })
+  });
 
-  return res.status(200).json({ message: "Access token refreshed" });
-}
+  return res.status(200).json({ accessToken: newAccessToken });
+};
