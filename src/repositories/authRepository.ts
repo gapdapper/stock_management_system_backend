@@ -73,3 +73,17 @@ export const updateRefreshToken = async (refreshTokenRecord: IRefreshToken): Pro
     })
     .where(eq(schema.refreshTokens.userId, userId));
 }
+
+export const getUserProfileById = async (userId: number): Promise<Partial<IUser> | undefined> => {
+  const user = await db.query.users.findFirst({
+    where: eq(schema.users.id, userId),
+    columns: {
+      id: true,
+      username: true,
+      role: true,
+      firstName: true,
+      lastName: true,
+    },
+  });
+  return user;
+}

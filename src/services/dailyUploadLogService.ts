@@ -27,3 +27,8 @@ export const checkDailyUploadLog = async (date: Date) => {
         { headers: HEADERS })
     }
 }
+
+export const getUploadLog = async () => {
+    const uploadLog = await dailyUploadLogRepository.getUploadLog();
+    return uploadLog;
+}

@@ -148,3 +148,27 @@ export const refreshToken = async (
 
   return { newAccessToken, newRefreshToken };
 };
+
+export const getUserProfile = async (token: string): Promise<any> => {
+  const payload = jwt.verify(
+    token,
+    process.env.ACCESS_TOKEN_SECRET as string
+  ) as jwt.JwtPayload;
+  if (!payload.sub) {
+    throw new UnauthorizedError({
+      code: 401,
+      message: "Invalid access token payload",
+      logging: true,
+    });
+  }
+  const userId = Number(payload.sub);
+  const userProfile = await authRepository.getUserProfileById(userId);
+  if (!userProfile) {
+    throw new UnauthorizedError({
+      code: 401,
+      message: "User profile not found",
+      logging: true,
+    });
+  }
+  return userProfile;
+}

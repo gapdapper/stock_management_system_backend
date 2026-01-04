@@ -106,9 +106,38 @@ export const refreshToken = async (
   res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    maxAge: Number(process.env.ACCESS_TOKEN_COOKIE_MAX_AGE),
+    maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE),
     sameSite: "strict",
   });
 
   return res.status(200).json({ accessToken: newAccessToken });
+};
+
+export const getProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new BadRequestError({
+        code: 400,
+        message: "Authorization header is missing or malformed",
+        logging: true,
+      });
+    }
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      throw new BadRequestError({
+        code: 400,
+        message: "Access token is missing",
+        logging: true,
+      });
+    }
+    const userProfile = await authService.getUserProfile(token);
+    res.status(200).json({ profile: userProfile });
+  } catch (error) {
+    next(error);
+  }
 };
