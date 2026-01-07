@@ -7,6 +7,37 @@ export const getAllProducts = async () => {
     return products;
 }
 
+export const getAllProductsWithVariant = async () => {
+  const rows = await db
+    .select({
+      productId: schema.product.id,
+      productName: schema.product.productName,
+
+      qty: schema.productVariant.qty,
+      minStock: schema.productVariant.minStock,
+      variantUpdatedAt: schema.productVariant.updatedAt,
+
+      size: schema.productSize.size,
+      color: schema.productColor.color,
+    })
+    .from(schema.product)
+    .leftJoin(
+      schema.productVariant,
+      eq(schema.product.id, schema.productVariant.productId)
+    )
+    .leftJoin(
+      schema.productSize,
+      eq(schema.productVariant.sizeId, schema.productSize.id)
+    )
+    .leftJoin(
+      schema.productColor,
+      eq(schema.productVariant.colorId, schema.productColor.id)
+    );
+
+  return rows;
+};
+
+
 export const getProductById = async (productId: number) => {
     const product = await db.query.product.findFirst({
         where: eq(schema.product.id, productId),
@@ -17,9 +48,6 @@ export const getProductById = async (productId: number) => {
 export const editProduct = async (product: any) => {
     const result = await db.update(schema.product).set({
         productName: product.productName,
-        productSizeId: product.productSizeId,
-        productColorId: product.productColorId,
-        productQty: product.productQty,
         updatedAt: new Date(),
     }).where(eq(schema.product.id, product.id)).returning();
     return result;

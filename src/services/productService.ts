@@ -1,6 +1,8 @@
-import type { IProduct } from "@/models/product";
+import type { IProduct, IProductRow, IShapedProduct } from "@/models/product";
 import * as productRepository from "@/repositories/productRepository";
 import NotFoundError from "@/utils/errors/not-found";
+
+
 
 export const getAllProducts = async () => {
   const products = await productRepository.getAllProducts();
@@ -12,6 +14,62 @@ export const getAllProducts = async () => {
     });
   }
   return products;
+};
+
+export const getAllProductsWithVariant = async () => {
+  const rows: IProductRow[] = await productRepository.getAllProductsWithVariant();
+  if (!rows) {
+    throw new NotFoundError({
+      code: 404,
+      message: "No products found",
+      logging: false,
+    });
+  }
+
+const result = rows.reduce<IShapedProduct[]>((acc, row) => {
+    let product = acc.find(p => p.id === row.productId);
+
+    if (!product) {
+      product = {
+        id: row.productId,
+        productName: row.productName,
+        totalStock: 0,
+        lastUpdated: row.variantUpdatedAt ?? new Date(0),
+        variants: [],
+      };
+      acc.push(product);
+    }
+
+    // total stock
+    product.totalStock += row.qty ?? 0;
+
+    // latest updated (from variant)
+    if (
+      row.variantUpdatedAt &&
+      row.variantUpdatedAt > product.lastUpdated
+    ) {
+      product.lastUpdated = row.variantUpdatedAt;
+    }
+
+    if (!row.size || !row.color) return acc;
+
+    let variant = product.variants.find(v => v.size === row.size);
+    if (!variant) {
+      variant = { size: row.size, sub: [] };
+      product.variants.push(variant);
+    }
+
+    variant.sub.push({
+      color: row.color,
+      stock: row.qty ?? 0,
+      minStock: row.minStock ?? 0,
+    });
+
+    return acc;
+  }, []);
+
+
+  return result;
 };
 
 export const getProductById = async (productId: number) => {

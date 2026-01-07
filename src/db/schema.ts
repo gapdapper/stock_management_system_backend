@@ -39,6 +39,7 @@ export const productVariant = pgTable("product_variant", {
   colorId: t.integer("color_id").references(() => productColor.id),
   sizeId: t.integer("size_id").references(() => productSize.id),
   qty: t.integer("qty").notNull(),
+  minStock: t.integer("min_stock").notNull(),
   updatedAt: t.timestamp("updated_at").notNull().defaultNow(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 });

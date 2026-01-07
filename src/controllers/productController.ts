@@ -1,9 +1,18 @@
 import * as productService from "@/services/productService"
 import type { Request, Response, NextFunction } from "express";
 
-export const getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const results = await productService.getAllProducts();
+        return res.status(200).json({ products: results });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllProductsWithVariant = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const results = await productService.getAllProductsWithVariant();
         return res.status(200).json({ products: results });
     } catch (error) {
         next(error);

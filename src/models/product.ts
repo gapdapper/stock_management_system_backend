@@ -21,3 +21,28 @@ export interface IProductColor {
     updatedAt?: Date;
     createdAt?: Date;
 }
+
+export interface IProductRow {
+  productId: number;
+  productName: string;
+  size: string | null;
+  color: string | null;
+  qty: number | null;
+  minStock: number | null;
+  variantUpdatedAt: Date | null;
+}
+
+export interface IShapedProduct {
+  id: number;
+  productName: string;
+  totalStock: number;
+  lastUpdated: Date;
+  variants: {
+    size: string;
+    sub: {
+      color: string;
+      stock: number;
+      minStock: number;
+    }[];
+  }[];
+};
