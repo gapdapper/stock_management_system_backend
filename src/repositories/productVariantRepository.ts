@@ -1,5 +1,6 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
+import type { IProductVariant, IProductVariantPayload } from "@/models/product";
 import { and, eq, sql } from "drizzle-orm";
 
 export const getAllProductVariants = async () => {
@@ -33,3 +34,32 @@ export const updateProductVariantQuantity = async (productVariantId: number, qua
     }).where(eq(schema.productVariant.id, productVariantId)).returning();
     return result;
 }
+
+export const editProductVariant = async (productVariant: IProductVariant) => {
+    const result = await db.update(schema.productVariant).set({
+        qty: productVariant.qty,
+        minStock: productVariant.minStock,
+        updatedAt: new Date(),
+    }).where(eq(schema.productVariant.id, productVariant.id)).returning();
+    return result;
+}
+
+export const updateMultipleVariantQuantity = async (
+  items: IProductVariantPayload[]
+) => {
+  if (!items || items.length === 0) return;
+
+    console.log(items)
+
+  await db.transaction(async (tx) => {
+    for (const item of items) {
+      await tx
+        .update(schema.productVariant)
+        .set({
+          qty: sql`${schema.productVariant.qty} + ${item.qty}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.productVariant.id, item.variantId));
+    }
+  });
+};

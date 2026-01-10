@@ -13,6 +13,7 @@ export const getAllProductsWithVariant = async () => {
       productId: schema.product.id,
       productName: schema.product.productName,
 
+      variantId: schema.productVariant.id,
       qty: schema.productVariant.qty,
       minStock: schema.productVariant.minStock,
       variantUpdatedAt: schema.productVariant.updatedAt,

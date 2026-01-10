@@ -1,6 +1,7 @@
 import type { IProduct, IProductRow, IShapedProduct } from "@/models/product";
 import * as productRepository from "@/repositories/productRepository";
 import NotFoundError from "@/utils/errors/not-found";
+import { getSizeIndex } from "@/utils/product";
 
 
 
@@ -51,7 +52,7 @@ const result = rows.reduce<IShapedProduct[]>((acc, row) => {
       product.lastUpdated = row.variantUpdatedAt;
     }
 
-    if (!row.size || !row.color) return acc;
+    if (!row.size || !row.color || !row.variantId) return acc;
 
     let variant = product.variants.find(v => v.size === row.size);
     if (!variant) {
@@ -60,6 +61,7 @@ const result = rows.reduce<IShapedProduct[]>((acc, row) => {
     }
 
     variant.sub.push({
+      variantId: row.variantId,
       color: row.color,
       stock: row.qty ?? 0,
       minStock: row.minStock ?? 0,
@@ -67,6 +69,18 @@ const result = rows.reduce<IShapedProduct[]>((acc, row) => {
 
     return acc;
   }, []);
+
+  result.forEach(product => {
+  product.variants.sort(
+    (a, b) => getSizeIndex(a.size) - getSizeIndex(b.size)
+  );
+
+  product.variants.forEach(v => {
+    v.sub.sort((a, b) =>
+      a.color.localeCompare(b.color)
+    );
+  });
+});
 
 
   return result;

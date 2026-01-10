@@ -8,6 +8,7 @@ import productRouter from '@/routes/productRoutes';
 import productColorRouter from '@/routes/productColorRoutes';
 import productSizeRouter from '@/routes/productSizeRoutes';
 import transactionRouter from '@/routes/transactionRoutes';
+import productVariantRouter from '@/routes/productvariantRoutes'
 import dailyUploadLogRouter from '@/routes/dailyUploadLogRoutes';
 import webhookRouter from '@/routes/webhookRoutes';
 import cookieParser from 'cookie-parser';
@@ -36,6 +37,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/productColors', productColorRouter);
 app.use('/api/v1/productSizes', productSizeRouter);
+app.use('/api/v1/productVariant', productVariantRouter);
 app.use('/api/v1/transactions', transactionRouter);
 app.use('/api/v1/dailyUploadLog', dailyUploadLogRouter);
 app.use('/api/v1/webhooks', webhookRouter);
