@@ -51,28 +51,29 @@ export const SignatureRules = [
       quantity: "-",
     },
   },
-  // {
-  //   provider: "tiktok",
-  //   mustHave: ["RTS Time"],
-  //   keyColumns: [
-  //     "Order ID",
-  //     "Buyer Username",
-  //     "Payment Method",
-  //     "Product Name",
-  //     "Variation",
-  //     "Quantity",
-  //     "Cancelation/Return Type",
-  //   ],
-  //   normalizedColumns: {
-  //     orderId: "Order ID",
-  //     buyer: "Buyer Username",
-  //     paymentMethod: "Payment Method",
-  //     postalCode: "-",
-  //     status: "-",
-  //     cancelReason: "Cancelation/Return Type",
-  //     productName: "Product Name",
-  //     variation: "Variation",
-  //     quantity: "Quantity",
-  //   },
-  // }
+  {
+    provider: "tiktok",
+    mustHave: ["RTS Time"],
+    keyColumns: [
+      "Order ID",
+      "Order Status",
+      "Buyer Username",
+      "Payment Method",
+      "Product Name",
+      "Variation",
+      "Quantity",
+      "Cancelation/Return Type",
+    ],
+    normalizedColumns: {
+      orderId: "Order ID",
+      buyer: "Buyer Username",
+      paymentMethod: "Payment Method",
+      postalCode: "-",
+      status: "Order Status",
+      cancelReason: "Cancelation/Return Type",
+      productName: "Product Name",
+      variation: "Variation",
+      quantity: "Quantity",
+    },
+  }
 ];

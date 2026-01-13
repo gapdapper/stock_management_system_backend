@@ -252,6 +252,10 @@ export const processUploadedTransactionFiles = async (
           note: normalizedResult["cancelReason"] || "N/A",
         };
 
+        if (provider == 'tiktok') {
+          transaction.status = normalizedResult["cancelReason"] === "Return/Refund" ? "returned" : statusMapper(normalizedResult["status"], provider)
+        }
+
         const transactionItem = {
           transactionId: 0, // to be filled after transaction is created
           orderId: normalizedResult["orderId"],
