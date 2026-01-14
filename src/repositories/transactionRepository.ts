@@ -5,7 +5,34 @@ import { and, eq, sql, desc } from "drizzle-orm";
 
 // #region Transaction
 export const getAllTransactions = async () => {
-  const transactions = await db.query.transaction.findMany();
+  const transactions = await db
+    .selectDistinctOn([schema.transaction.orderId],{
+      id: schema.transaction.id,
+      orderId: schema.transaction.orderId,
+      buyer: schema.transaction.buyer,
+      status: schema.transaction.status,
+      createdAt: schema.transaction.createdAt,
+      paymentType: schema.paymentType.paymentType,
+      platform: schema.platform.platformName,
+      note: schema.transaction.note,
+    })
+    .from(schema.transaction)
+    .innerJoin(
+      schema.paymentType,
+      eq(schema.transaction.paymentTypeId, schema.paymentType.id)
+    )
+    .innerJoin(
+      schema.platform,
+      eq(schema.transaction.platformId, schema.platform.id)
+    )
+    .orderBy(
+      schema.transaction.orderId,
+      desc(schema.transaction.createdAt) 
+    );
+
+      if (!transactions) {
+    throw new Error("Failed to get transaction")
+  }
   return transactions;
 };
 
@@ -17,9 +44,51 @@ export const getTransactionById = async (transactionId: number) => {
 };
 
 export const getTransactionByOrderId = async (orderId: string) => {
-  const transaction = await db.query.transaction.findFirst({
-    where: eq(schema.transaction.orderId, orderId),
-  });
+  const transaction = await db
+    .select({
+      orderId: schema.transaction.orderId,
+      buyer: schema.transaction.buyer,
+      status: schema.transaction.status,
+      createdAt: schema.transaction.createdAt,
+      paymentType: schema.paymentType.paymentType,
+      platform: schema.platform.platformName,
+
+      variantId: schema.transactionItem.productVariantId,
+      productName: schema.product.productName,
+      size: schema.productSize.size,
+      color: schema.productColor.color,
+      quantity: schema.transactionItem.quantity,
+    })
+    .from(schema.transaction)
+    .where(eq(schema.transaction.orderId, orderId))
+    .innerJoin(
+      schema.paymentType,
+      eq(schema.transaction.paymentTypeId, schema.paymentType.id)
+    )
+    .innerJoin(
+      schema.platform,
+      eq(schema.transaction.platformId, schema.platform.id)
+    )
+    .innerJoin(
+      schema.transactionItem,
+      eq(schema.transaction.id, schema.transactionItem.transactionId)
+    )
+    .innerJoin(
+      schema.product,
+      eq(schema.transactionItem.productId, schema.product.id)
+    )
+    .innerJoin(
+      schema.productVariant,
+      eq(schema.transactionItem.productVariantId, schema.productVariant.id)
+    )
+    .innerJoin(
+      schema.productColor,
+      eq(schema.productVariant.colorId, schema.productColor.id)
+    )
+    .innerJoin(
+      schema.productSize,
+      eq(schema.productVariant.sizeId, schema.productSize.id)
+    );
   return transaction;
 };
 
@@ -158,7 +227,6 @@ export const sumUnitsSold = async () => {
     .from(schema.transactionItem);
 };
 
-
 export const topSoldProducts = async () => {
   const totalSold = sql<number>`sum(${schema.transactionItem.quantity})`;
 
@@ -173,10 +241,7 @@ export const topSoldProducts = async () => {
       schema.product,
       eq(schema.transactionItem.productId, schema.product.id)
     )
-    .groupBy(
-      schema.product.id,
-      schema.product.productName
-    )
+    .groupBy(schema.product.id, schema.product.productName)
     .orderBy(desc(totalSold))
     .limit(5);
 };

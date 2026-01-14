@@ -1,5 +1,5 @@
 import NotFoundError from "@/utils/errors/not-found";
-import type { ITransaction, ITransactionItem } from "@/models/transaction";
+import type { ITransaction, ITransactionItem, ITransactionResponse } from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
 import * as dailyUploadLogRepository from "@/repositories/dailyUploadLogRepository";
@@ -52,7 +52,26 @@ export const getTransactionByOrderId = async (orderId: string) => {
       logging: false,
     });
   }
-  return transaction;
+
+  const transactionWithGrouppedItems = {
+    orderId: transaction[0]?.orderId,
+    buyer: transaction[0]?.buyer,
+    status: transaction[0]?.status,
+    createdAt: transaction[0]?.createdAt,
+    paymentType: transaction[0]?.paymentType,
+    platform: transaction[0]?.platform,
+    items: transaction.map((item) => {
+      return {
+        variantId: item.variantId,
+        productName: item.productName,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+      };
+    }),
+  };
+
+  return transactionWithGrouppedItems;
 };
 
 export const editTransaction = async (transaction: ITransaction) => {
@@ -252,8 +271,11 @@ export const processUploadedTransactionFiles = async (
           note: normalizedResult["cancelReason"] || "N/A",
         };
 
-        if (provider == 'tiktok') {
-          transaction.status = normalizedResult["cancelReason"] === "Return/Refund" ? "returned" : statusMapper(normalizedResult["status"], provider)
+        if (provider == "tiktok") {
+          transaction.status =
+            normalizedResult["cancelReason"] === "Return/Refund"
+              ? "returned"
+              : statusMapper(normalizedResult["status"], provider);
         }
 
         const transactionItem = {
