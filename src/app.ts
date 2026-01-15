@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(pinoHttp());
 
 // Start the daily upload notification job
-// startDailyUploadNotifyJob();
+startDailyUploadNotifyJob();
 
 // Routes
 app.use('/api/v1/auth', authRouter);

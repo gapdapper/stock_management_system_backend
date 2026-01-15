@@ -1,5 +1,10 @@
 import NotFoundError from "@/utils/errors/not-found";
-import type { ITransaction, ITransactionItem, ITransactionResponse } from "@/models/transaction";
+import type {
+  ITransaction,
+  ITransactionItem,
+  ITransactionResponse,
+  TransactionStatus,
+} from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
 import * as dailyUploadLogRepository from "@/repositories/dailyUploadLogRepository";
@@ -175,7 +180,7 @@ export const deleteTransactionItem = async (
 // #endregion
 
 // #region Transaction Upload
-export const processUploadedTransactionFiles = async (
+export const processImportedTransactionFiles = async (
   files: Express.Multer.File[]
 ) => {
   let transactionBatch: ITransaction[] = [];
@@ -329,7 +334,7 @@ export const processUploadedTransactionFiles = async (
           }
         } else {
           // may need to deduct stock if status changed from 'cancelled' to other status later
-          if (existingTransaction.status !== transaction.status) {
+          if (existingTransaction[0]?.status !== transaction.status) {
             await transactionRepository.editTransactionStatus(
               transaction.orderId,
               transaction.status
@@ -373,12 +378,12 @@ export const processUploadedTransactionFiles = async (
         iq.quantity
       );
     }
-
-    // log the upload
-    await dailyUploadLogRepository.updateDailyUploadLog(new Date());
   } catch (error) {
     console.error("Error processing uploaded transaction files:", error);
     throw error;
+  } finally {
+    // log the upload
+    await dailyUploadLogRepository.updateDailyUploadLog(new Date());
   }
 };
 // #endregion

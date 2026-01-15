@@ -10,7 +10,7 @@ import {
   getTransactionItemsById,
   editTransactionItem,
   deleteTransactionItem,
-  uploadTransactions,
+  importTransactions,
 } from "@/controllers/transactionController";
 
 const router = express.Router();
@@ -30,7 +30,7 @@ router.post("/:transactionId/items", addTransactionItem);
 router.patch("/:transactionId/items/:id", editTransactionItem);
 router.delete("/:transactionId/items/:id", deleteTransactionItem);
 
-// Route for uploading transactions via spreadsheet
-router.post("/upload", upload.array('file', 12), uploadTransactions)
+// Route for importing transactions via spreadsheet
+router.post("/import", upload.array('file', 12), importTransactions)
 
 export default router;

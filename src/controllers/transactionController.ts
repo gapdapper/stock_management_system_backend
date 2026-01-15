@@ -126,13 +126,13 @@ export const deleteTransactionItem = async (req: Request, res: Response, next: N
 // #endregion
 
 // #region Transaction Upload
-export const uploadTransactions = async (req: Request, res: Response, next: NextFunction) => {
+export const importTransactions = async (req: Request, res: Response, next: NextFunction) => {
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
     }
     try {
-        await transactionService.processUploadedTransactionFiles(files);
+        await transactionService.processImportedTransactionFiles(files);
         res.status(200).json({ message: 'Files processed successfully' });
     } catch (error) {
         next(error);
