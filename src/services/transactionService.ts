@@ -297,8 +297,10 @@ export const processImportedTransactionFiles = async (
             transaction.orderId
           );
 
+          if (existingTransaction.length == 0)  console.log('existed',transaction.orderId)
+       
         // new transaction
-        if (!existingTransaction) {
+        if (!existingTransaction || existingTransaction.length == 0) {
           const duplicate = transactionBatch.find(
             (t) => t.orderId === transaction.orderId
           );

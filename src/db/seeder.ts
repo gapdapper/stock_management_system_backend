@@ -57,7 +57,6 @@ const productNames = [
   "Magnetic Chinese Chess",
   "Ludo - Ball",
   "Pull & Push Along Elephant",
-  "Magnetic Checkers V.2",
   "Draught Board with Chess Pieces",
   "Chess Pieces Set",
   "The Airplane Puzzle",
@@ -174,13 +173,12 @@ const productSeederConfig = [
   { id: 55, allowedColors: [14], allowedSizes: [5] },
   { id: 56, allowedColors: [14], allowedSizes: [5] },
   { id: 57, allowedColors: [14], allowedSizes: [5] },
-  { id: 58, allowedColors: [14], allowedSizes: [5] },
+  { id: 58, allowedColors: [14], allowedSizes: [4] },
   { id: 59, allowedColors: [14], allowedSizes: [4] },
   { id: 60, allowedColors: [14], allowedSizes: [5] },
   { id: 61, allowedColors: [14], allowedSizes: [5] },
   { id: 62, allowedColors: [14], allowedSizes: [5] },
   { id: 63, allowedColors: [14], allowedSizes: [5] },
-  { id: 64, allowedColors: [14], allowedSizes: [5] },
 ];
 
 export function buildProductVariants() {

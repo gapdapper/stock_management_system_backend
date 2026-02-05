@@ -47,10 +47,7 @@ export const editProductVariant = async (productVariant: IProductVariant) => {
 export const updateMultipleVariantQuantity = async (
   items: IProductVariantPayload[]
 ) => {
-  if (!items || items.length === 0) return;
-
-    console.log(items)
-
+  if (!items || items.length === 0) return "NO_VARIANT_PROVIDED";
   await db.transaction(async (tx) => {
     for (const item of items) {
       await tx
@@ -62,4 +59,15 @@ export const updateMultipleVariantQuantity = async (
         .where(eq(schema.productVariant.id, item.variantId));
     }
   });
+  return "BULK_RESTOCK_SUCCESS"
+};
+
+export const addProductVariantImageUrl = async (
+  productId: number,
+  imageUrl: string
+) => {
+  await db
+    .update(schema.productVariant)
+    .set({ imageUrl: imageUrl })
+    .where(eq(schema.product.id, productId));
 };

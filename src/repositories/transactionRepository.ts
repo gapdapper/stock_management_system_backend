@@ -60,7 +60,6 @@ export const getTransactionByOrderId = async (orderId: string) => {
       quantity: schema.transactionItem.quantity,
     })
     .from(schema.transaction)
-    .where(eq(schema.transaction.orderId, orderId))
     .innerJoin(
       schema.paymentType,
       eq(schema.transaction.paymentTypeId, schema.paymentType.id)
@@ -88,7 +87,8 @@ export const getTransactionByOrderId = async (orderId: string) => {
     .innerJoin(
       schema.productSize,
       eq(schema.productVariant.sizeId, schema.productSize.id)
-    );
+    )
+    .where(eq(schema.transaction.orderId, orderId));
   return transaction;
 };
 

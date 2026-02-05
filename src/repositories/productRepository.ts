@@ -3,20 +3,22 @@ import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const getAllProducts = async () => {
-    const products = await db.query.product.findMany();
-    return products;
-}
+  const products = await db.query.product.findMany();
+  return products;
+};
 
 export const getAllProductsWithVariant = async () => {
   const rows = await db
     .select({
       productId: schema.product.id,
       productName: schema.product.productName,
+      productImageUrl: schema.product.imageUrl,
 
       variantId: schema.productVariant.id,
       qty: schema.productVariant.qty,
       minStock: schema.productVariant.minStock,
       variantUpdatedAt: schema.productVariant.updatedAt,
+      variantImageUrl: schema.productVariant.imageUrl,
 
       size: schema.productSize.size,
       color: schema.productColor.color,
@@ -38,30 +40,46 @@ export const getAllProductsWithVariant = async () => {
   return rows;
 };
 
-
 export const getProductById = async (productId: number) => {
-    const product = await db.query.product.findFirst({
-        where: eq(schema.product.id, productId),
-    });
-    return product;
-}
+  const product = await db.query.product.findFirst({
+    where: eq(schema.product.id, productId),
+  });
+  return product;
+};
 
 export const editProduct = async (product: any) => {
-    const result = await db.update(schema.product).set({
-        productName: product.productName,
-        updatedAt: new Date(),
-    }).where(eq(schema.product.id, product.id)).returning();
-    return result;
-}
+  const result = await db
+    .update(schema.product)
+    .set({
+      productName: product.productName,
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.product.id, product.id))
+    .returning();
+  return result;
+};
 
 export const addProduct = async (product: any) => {
-    const result = await db.insert(schema.product).values(product).returning();
-    return result[0];
-}
+  const result = await db.insert(schema.product).values(product).returning();
+  return result[0];
+};
 
 export const deleteProduct = async (productId: number) => {
-    const result = await db.delete(schema.product).where(eq(schema.product.id, productId)).returning({
-        deletedId: schema.product.id,
+  const result = await db
+    .delete(schema.product)
+    .where(eq(schema.product.id, productId))
+    .returning({
+      deletedId: schema.product.id,
     });
-    return result;
-}
+  return result;
+};
+
+export const addProductImageUrl = async (
+  productId: number,
+  imageUrl: string
+) => {
+  await db
+    .update(schema.product)
+    .set({ imageUrl: imageUrl })
+    .where(eq(schema.product.id, productId));
+};

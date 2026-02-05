@@ -26,6 +26,7 @@ export const refreshTokens = pgTable("refresh_tokens", {
 export const product = pgTable("product", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   productName: t.varchar("product_name").notNull(),
+  imageUrl: t.varchar("image_url"),
   updatedAt: t.timestamp("updated_at").notNull().defaultNow(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 });
@@ -40,6 +41,7 @@ export const productVariant = pgTable("product_variant", {
   sizeId: t.integer("size_id").references(() => productSize.id),
   qty: t.integer("qty").notNull(),
   minStock: t.integer("min_stock").notNull(),
+  imageUrl: t.varchar("image_url"),
   updatedAt: t.timestamp("updated_at").notNull().defaultNow(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 });
