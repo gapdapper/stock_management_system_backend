@@ -6,7 +6,7 @@ import { getSizeIndex } from "@/utils/product";
 import sharp from "sharp";
 
 export const getAllProducts = async () => {
-  const products = await productRepository.getAllProducts();
+  const products = await productRepository.findAll();
   if (!products) {
     throw new NotFoundError({
       code: 404,
@@ -19,7 +19,7 @@ export const getAllProducts = async () => {
 
 export const getAllProductsWithVariant = async () => {
   const rows: IProductRow[] =
-    await productRepository.getAllProductsWithVariant();
+    await productRepository.findAllWithVariant();
   if (!rows) {
     throw new NotFoundError({
       code: 404,
@@ -84,7 +84,7 @@ export const getAllProductsWithVariant = async () => {
 };
 
 export const getProductById = async (productId: number) => {
-  const product = await productRepository.getProductById(productId);
+  const product = await productRepository.findById(productId);
   if (!product) {
     throw new NotFoundError({
       code: 404,
@@ -96,7 +96,7 @@ export const getProductById = async (productId: number) => {
 };
 
 export const editProduct = async (product: IProduct) => {
-  const updatedProduct = await productRepository.editProduct(product);
+  const updatedProduct = await productRepository.updateById(product.id, product);
   if (!updatedProduct) {
     throw new NotFoundError({
       code: 404,
@@ -108,7 +108,7 @@ export const editProduct = async (product: IProduct) => {
 };
 
 export const addProduct = async (product: IProduct) => {
-  const newProduct = await productRepository.addProduct(product);
+  const newProduct = await productRepository.create(product);
   if (!newProduct) {
     throw new Error("Failed to add new product");
   }
@@ -116,7 +116,7 @@ export const addProduct = async (product: IProduct) => {
 };
 
 export const deleteProduct = async (productId: number) => {
-  const product = await productRepository.getProductById(productId);
+  const product = await productRepository.findById(productId);
   if (!product) {
     throw new NotFoundError({
       code: 404,
@@ -124,7 +124,7 @@ export const deleteProduct = async (productId: number) => {
       logging: false,
     });
   }
-  const result = await productRepository.deleteProduct(productId);
+  const result = await productRepository.deleteById(productId);
   return result;
 };
 
@@ -140,7 +140,7 @@ export const uploadProductImage = async (
     throw new Error("Invalid file type");
   }
 
-  const product = await productRepository.getProductById(productId);
+  const product = await productRepository.findById(productId);
   if (!product) {
     throw new Error("Product not found");
   }
@@ -169,7 +169,8 @@ export const uploadProductImage = async (
       .from("product-images")
       .getPublicUrl(filePath);
 
-    await productRepository.addProductImageUrl(productId, data.publicUrl);
+    const updatedObj = { imageUrl: data.publicUrl };
+    await productRepository.updateById(productId, updatedObj);
 
     // remove previous image
     if (product.imageUrl) {
