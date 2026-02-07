@@ -249,7 +249,7 @@ export const processImportedTransactionFiles = async (
           provider
         );
         const productVariant =
-          await productVariantRepository.getProductVariantByProductIdColorIdSizeId(
+          await productVariantRepository.findByProductIdAndAttributesId(
             productId,
             colorId,
             sizeId
@@ -375,7 +375,7 @@ export const processImportedTransactionFiles = async (
 
     // alter stock quantity
     for (const iq of itemQuantity) {
-      await productVariantRepository.updateProductVariantQuantity(
+      await productVariantRepository.updateQuantityById(
         iq.productVariantId,
         iq.quantity
       );

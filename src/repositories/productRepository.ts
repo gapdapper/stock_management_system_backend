@@ -1,5 +1,6 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
+import type { IProduct } from "@/models/product";
 import { eq } from "drizzle-orm";
 
 export const findAll = async () => {
@@ -47,7 +48,7 @@ export const findById = async (productId: number) => {
   return product;
 };
 
-export const updateById = async (id:number, data: any) => {
+export const updateById = async (id:number, data: Partial<IProduct>) => {
   const result = await db
     .update(schema.product)
     .set({

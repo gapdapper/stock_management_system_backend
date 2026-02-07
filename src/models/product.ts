@@ -4,6 +4,7 @@ export interface IProduct {
   productSizeId: number;
   productColorId: number;
   productQty: number;
+  imageUrl: string | null;
   updatedAt?: Date;
   createdAt?: Date;
 }

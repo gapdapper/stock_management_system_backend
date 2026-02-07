@@ -5,7 +5,7 @@ import { supabase } from "@/db/supabase";
 import sharp from "sharp";
 
 export const editProductVariant = async (product: IProductVariant) => {
-  const updatedProduct: IProductVariant[] = await productVariantRepository.editProductVariant(product);
+  const updatedProduct: IProductVariant[] = await productVariantRepository.updateById(product.id, product);
   if (!updatedProduct) {
     throw new NotFoundError({
       code: 404,
@@ -17,7 +17,7 @@ export const editProductVariant = async (product: IProductVariant) => {
 }
 
 export const restockProductVariant = async (productVariants: any) => {
-  const updatedProduct = await productVariantRepository.updateMultipleVariantQuantity(productVariants);
+  const updatedProduct = await productVariantRepository.updateQuantitiesByIds(productVariants);
   return updatedProduct;
 }
 
@@ -33,7 +33,7 @@ export const uploadProductImage = async (
     throw new Error("Invalid file type");
   }
 
-  const product = await productVariantRepository.getProductVariantById(variantId);
+  const product = await productVariantRepository.findById(variantId);
   if (!product) {
     throw new Error("Product not found");
   }
@@ -62,7 +62,8 @@ export const uploadProductImage = async (
       .from("product-images")
       .getPublicUrl(filePath);
 
-    await productVariantRepository.addProductVariantImageUrl(variantId, data.publicUrl);
+    const publicUrlObj = { imageUrl: data.publicUrl };
+    await productVariantRepository.updateById(variantId, publicUrlObj);
 
     // remove previous image
     if (product.imageUrl) {

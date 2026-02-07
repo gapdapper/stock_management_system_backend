@@ -3,19 +3,19 @@ import * as schema from "@/db/schema";
 import type { IProductVariant, IProductVariantPayload } from "@/models/product";
 import { and, eq, sql } from "drizzle-orm";
 
-export const getAllProductVariants = async () => {
+export const findAll = async () => {
     const productVariants = await db.query.productVariant.findMany();
     return productVariants;
 }
 
-export const getProductVariantById = async (productVariantId: number) => {
+export const findById = async (id: number) => {
     const productVariant = await db.query.productVariant.findFirst({
-        where: eq(schema.productVariant.id, productVariantId),
+        where: eq(schema.productVariant.id, id),
     });
     return productVariant;
 }
 
-export const getProductVariantByProductIdColorIdSizeId = async (productId: number, colorId: number, sizeId: number) => {
+export const findByProductIdAndAttributesId = async (productId: number, colorId: number, sizeId: number) => {
     const productVariant = await db.query.productVariant.findFirst({
         where: and(
             eq(schema.productVariant.productId, productId),
@@ -26,25 +26,24 @@ export const getProductVariantByProductIdColorIdSizeId = async (productId: numbe
     return productVariant;
 }
 
-export const updateProductVariantQuantity = async (productVariantId: number, quantityChange: number) => {
+export const updateQuantityById = async (id: number, quantityChange: number) => {
     // accept both positive and negative quantityChange
     const result = await db.update(schema.productVariant).set({
         qty: sql`${schema.productVariant.qty} + ${quantityChange}`,
         updatedAt: new Date(),
-    }).where(eq(schema.productVariant.id, productVariantId)).returning();
+    }).where(eq(schema.productVariant.id, id)).returning();
     return result;
 }
 
-export const editProductVariant = async (productVariant: IProductVariant) => {
+export const updateById = async (id: number, data: Partial<IProductVariant>) => {
     const result = await db.update(schema.productVariant).set({
-        qty: productVariant.qty,
-        minStock: productVariant.minStock,
+        ...data,
         updatedAt: new Date(),
-    }).where(eq(schema.productVariant.id, productVariant.id)).returning();
+    }).where(eq(schema.productVariant.id, id)).returning();
     return result;
 }
 
-export const updateMultipleVariantQuantity = async (
+export const updateQuantitiesByIds = async (
   items: IProductVariantPayload[]
 ) => {
   if (!items || items.length === 0) return "NO_VARIANT_PROVIDED";
@@ -60,14 +59,4 @@ export const updateMultipleVariantQuantity = async (
     }
   });
   return "BULK_RESTOCK_SUCCESS"
-};
-
-export const addProductVariantImageUrl = async (
-  productId: number,
-  imageUrl: string
-) => {
-  await db
-    .update(schema.productVariant)
-    .set({ imageUrl: imageUrl })
-    .where(eq(schema.product.id, productId));
 };
