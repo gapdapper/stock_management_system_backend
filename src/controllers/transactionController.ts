@@ -4,7 +4,7 @@ import * as transactionService from "@/services/transactionService"
 // #region Transaction
 export const getTransaction = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const results = await transactionService.getAllTransactions();
+        const results = await transactionService.getTransactions();
         return res.status(200).json({ transactions: results });
     } catch (error) {
         next(error);
@@ -12,12 +12,12 @@ export const getTransaction = async (req: Request, res: Response, next: NextFunc
 }
 
 export const getTransactionById = async (req: Request, res: Response, next: NextFunction) => {
-    const transactionId = Number(req.params.id);
-    if (isNaN(transactionId)) {
+    const transactionId = req.params.id;
+    if (!transactionId) {
         return res.status(400).json({ message: 'Invalid transactionId' });
     }
     try {
-        const result = await transactionService.getTransactionById(transactionId);
+        const result = await transactionService.getTransactionByOrderId(transactionId);
         return res.status(200).json({ transaction: result });
     } catch (error) {
         next(error);
@@ -126,13 +126,13 @@ export const deleteTransactionItem = async (req: Request, res: Response, next: N
 // #endregion
 
 // #region Transaction Upload
-export const uploadTransactions = async (req: Request, res: Response, next: NextFunction) => {
+export const importTransactions = async (req: Request, res: Response, next: NextFunction) => {
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
     }
     try {
-        await transactionService.processUploadedTransactionFiles(files);
+        await transactionService.processImportedTransactionFiles(files);
         res.status(200).json({ message: 'Files processed successfully' });
     } catch (error) {
         next(error);

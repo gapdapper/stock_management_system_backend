@@ -9,16 +9,24 @@ export const users = pgTable("users", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   username: t.varchar().notNull(),
   password: t.varchar().notNull(),
-  refreshToken: t.varchar("refresh_token"),
   role: roles().notNull(),
   firstName: t.varchar("first_name").notNull(),
   lastName: t.varchar("last_name").notNull(),
   createdAt: t.timestamp("created_at").defaultNow(),
 });
 
+export const refreshTokens = pgTable("refresh_tokens", {
+  id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+  userId: t.integer("user_id").notNull().references(() => users.id).unique(),
+  token: t.varchar().notNull(),
+  expiresAt: t.timestamp("expires_at").notNull(),
+  createdAt: t.timestamp("created_at").defaultNow(),
+});
+
 export const product = pgTable("product", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   productName: t.varchar("product_name").notNull(),
+  imageUrl: t.varchar("image_url"),
   updatedAt: t.timestamp("updated_at").notNull().defaultNow(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 });
@@ -32,6 +40,8 @@ export const productVariant = pgTable("product_variant", {
   colorId: t.integer("color_id").references(() => productColor.id),
   sizeId: t.integer("size_id").references(() => productSize.id),
   qty: t.integer("qty").notNull(),
+  minStock: t.integer("min_stock").notNull(),
+  imageUrl: t.varchar("image_url"),
   updatedAt: t.timestamp("updated_at").notNull().defaultNow(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 });

@@ -1,5 +1,10 @@
 import NotFoundError from "@/utils/errors/not-found";
-import type { ITransaction, ITransactionItem } from "@/models/transaction";
+import type {
+  ITransaction,
+  ITransactionItem,
+  ITransactionResponse,
+  TransactionStatus,
+} from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
 import * as dailyUploadLogRepository from "@/repositories/dailyUploadLogRepository";
@@ -15,8 +20,8 @@ import {
 import { SignatureRules } from "@/utils/sheets/rules";
 
 // #region Transaction
-export const getAllTransactions = async () => {
-  const transactions = await transactionRepository.getAllTransactions();
+export const getTransactions = async () => {
+  const transactions = await transactionRepository.findAllTransactions();
   if (!transactions) {
     throw new NotFoundError({
       code: 404,
@@ -28,7 +33,7 @@ export const getAllTransactions = async () => {
 };
 
 export const getTransactionById = async (transactionId: number) => {
-  const transaction = await transactionRepository.getTransactionById(
+  const transaction = await transactionRepository.findTransactionById(
     transactionId
   );
   if (!transaction) {
@@ -42,7 +47,7 @@ export const getTransactionById = async (transactionId: number) => {
 };
 
 export const getTransactionByOrderId = async (orderId: string) => {
-  const transaction = await transactionRepository.getTransactionByOrderId(
+  const transaction = await transactionRepository.findTransactionByOrderId(
     orderId
   );
   if (!transaction) {
@@ -52,11 +57,30 @@ export const getTransactionByOrderId = async (orderId: string) => {
       logging: false,
     });
   }
-  return transaction;
+
+  const transactionWithGrouppedItems = {
+    orderId: transaction[0]?.orderId,
+    buyer: transaction[0]?.buyer,
+    status: transaction[0]?.status,
+    createdAt: transaction[0]?.createdAt,
+    paymentType: transaction[0]?.paymentType,
+    platform: transaction[0]?.platform,
+    items: transaction.map((item) => {
+      return {
+        variantId: item.variantId,
+        productName: item.productName,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+      };
+    }),
+  };
+
+  return transactionWithGrouppedItems;
 };
 
 export const editTransaction = async (transaction: ITransaction) => {
-  const updatedTransaction = await transactionRepository.editTransaction(
+  const updatedTransaction = await transactionRepository.updateTransaction(
     transaction
   );
   if (!updatedTransaction) {
@@ -70,14 +94,14 @@ export const editTransaction = async (transaction: ITransaction) => {
 };
 
 export const addTransaction = async (transaction: ITransaction) => {
-  const newTransaction = await transactionRepository.addTransaction(
+  const newTransaction = await transactionRepository.createTransaction(
     transaction
   );
   return newTransaction;
 };
 
 export const deleteTransaction = async (transactionId: number) => {
-  const transaction = await transactionRepository.getTransactionById(
+  const transaction = await transactionRepository.findTransactionById(
     transactionId
   );
   if (!transaction) {
@@ -87,14 +111,14 @@ export const deleteTransaction = async (transactionId: number) => {
       logging: false,
     });
   }
-  await transactionRepository.deleteTransaction(transactionId);
+  await transactionRepository.deleteTransactionById(transactionId);
 };
 // #endregion
 
 // #region Transaction Item
 
 export const getTransactionItemsById = async (transactionId: number) => {
-  const items = await transactionRepository.getTransactionItemsById(
+  const items = await transactionRepository.findTransactionItemsByTransactionId(
     transactionId
   );
   if (!items || items.length === 0) {
@@ -119,7 +143,7 @@ export const addTransactionItem = async (
     productVariantId,
     quantity,
   };
-  const newTransactionItem = await transactionRepository.addTransactionItem(
+  const newTransactionItem = await transactionRepository.createTransactionItem(
     transactionItem
   );
   return newTransactionItem;
@@ -138,7 +162,7 @@ export const editTransactionItem = async (
     quantity,
   };
   const updatedTransactionItem =
-    await transactionRepository.editTransactionItem(transactionItem);
+    await transactionRepository.updateTransactionItem(transactionItem);
   return updatedTransactionItem;
 };
 
@@ -156,7 +180,7 @@ export const deleteTransactionItem = async (
 // #endregion
 
 // #region Transaction Upload
-export const processUploadedTransactionFiles = async (
+export const processImportedTransactionFiles = async (
   files: Express.Multer.File[]
 ) => {
   let transactionBatch: ITransaction[] = [];
@@ -225,7 +249,7 @@ export const processUploadedTransactionFiles = async (
           provider
         );
         const productVariant =
-          await productVariantRepository.getProductVariantByProductIdColorIdSizeId(
+          await productVariantRepository.findByProductIdAndAttributesId(
             productId,
             colorId,
             sizeId
@@ -252,6 +276,13 @@ export const processUploadedTransactionFiles = async (
           note: normalizedResult["cancelReason"] || "N/A",
         };
 
+        if (provider == "tiktok") {
+          transaction.status =
+            normalizedResult["cancelReason"] === "Return/Refund"
+              ? "returned"
+              : statusMapper(normalizedResult["status"], provider);
+        }
+
         const transactionItem = {
           transactionId: 0, // to be filled after transaction is created
           orderId: normalizedResult["orderId"],
@@ -262,12 +293,14 @@ export const processUploadedTransactionFiles = async (
 
         // if orderId exists, update status only
         const existingTransaction =
-          await transactionRepository.getTransactionByOrderId(
+          await transactionRepository.findTransactionByOrderId(
             transaction.orderId
           );
 
+          if (existingTransaction.length == 0)  console.log('existed',transaction.orderId)
+       
         // new transaction
-        if (!existingTransaction) {
+        if (!existingTransaction || existingTransaction.length == 0) {
           const duplicate = transactionBatch.find(
             (t) => t.orderId === transaction.orderId
           );
@@ -303,8 +336,8 @@ export const processUploadedTransactionFiles = async (
           }
         } else {
           // may need to deduct stock if status changed from 'cancelled' to other status later
-          if (existingTransaction.status !== transaction.status) {
-            await transactionRepository.editTransactionStatus(
+          if (existingTransaction[0]?.status !== transaction.status) {
+            await transactionRepository.updateTransactionStatus(
               transaction.orderId,
               transaction.status
             );
@@ -321,7 +354,7 @@ export const processUploadedTransactionFiles = async (
 
     // bulk insert transactions
     const createdTransaction =
-      await transactionRepository.addMultipleTransactions(transactionBatch);
+      await transactionRepository.createManyTransactions(transactionBatch);
     if (!createdTransaction) {
       throw new Error("Failed to create transactions");
     }
@@ -336,23 +369,23 @@ export const processUploadedTransactionFiles = async (
         delete item.orderId;
       }
     }
-    await transactionRepository.addMultipleTransactionItems(
+    await transactionRepository.createManyTransactionItems(
       transactionItemBatch
     );
 
     // alter stock quantity
     for (const iq of itemQuantity) {
-      await productVariantRepository.updateProductVariantQuantity(
+      await productVariantRepository.updateQuantityById(
         iq.productVariantId,
         iq.quantity
       );
     }
-
-    // log the upload
-    await dailyUploadLogRepository.updateDailyUploadLog(new Date());
   } catch (error) {
     console.error("Error processing uploaded transaction files:", error);
     throw error;
+  } finally {
+    // log the upload
+    await dailyUploadLogRepository.updateDailyUploadLog(new Date());
   }
 };
 // #endregion

@@ -162,6 +162,17 @@ export function statusMapper(rawStatus: string, provider: string): TransactionSt
     return statusMapping[rawStatus as string] as TransactionStatus || "order placed";
   }
 
+    if (provider === "tiktok") {
+        const statusMapping: Record<string, string> = {
+      "เสร็จสมบูรณ์": "completed",
+      "ยกเลิกแล้ว": "cancelled",
+      "จัดส่งแล้ว": "shipped",
+      "ที่จะจัดส่ง": "order placed",
+    };
+
+    return statusMapping[rawStatus as string] as TransactionStatus || "order placed";
+  }
+
   return "order placed";
 }
 

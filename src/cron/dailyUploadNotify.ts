@@ -7,7 +7,7 @@ export function startDailyUploadNotifyJob() {
     if (job) return; // Job already started
 
     job = new CronJob(
-        '* * * * *', // Runs every day at lunch time
+        '0 12 * * *', // Runs every day at lunch time
         async () => {
             await dailyUploadLogService.checkDailyUploadLog(new Date());
         },

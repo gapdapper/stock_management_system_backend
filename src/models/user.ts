@@ -9,3 +9,11 @@ export interface IUser {
     firstName: string;
     lastName: string;
 }
+
+export interface IRefreshToken {
+    id?: number;
+    userId: number;
+    token: string;
+    expiresAt: Date;
+    createdAt?: Date | null;
+}

@@ -7,19 +7,32 @@ export const authenticateUser = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.cookies.accessToken;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next(
+      new UnauthorizedError({
+        code: 401,
+        message: "Access token is missing",
+      })
+    );
+  }
+
+  const token = authHeader.split(" ")[1];
 
   if (!token) {
-    throw new UnauthorizedError({
-      code: 401,
-      message: "Access token is missing",
-    });
+    return next(
+      new UnauthorizedError({
+        code: 401,
+        message: "Access token is missing",
+      })
+    );
   }
 
   try {
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { userId: string };
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { sub: string };
 
-    (req as any).userId = decodedToken.userId;
+    (req as any).user = { id: decodedToken.sub };
     next();
   } catch (error) {
     next(new UnauthorizedError({
@@ -29,29 +42,29 @@ export const authenticateUser = (
   }
 };
 
-export const refreshTokenValidation = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        throw new UnauthorizedError({
-            code: 401,
-            message: "Refresh token is missing",
-            logging: true,
-        });
-    }
+// export const refreshTokenValidation = (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   const refreshToken = req.cookies.refreshToken;
+//     if (!refreshToken) {
+//         throw new UnauthorizedError({
+//             code: 401,
+//             message: "Refresh token is missing",
+//             logging: true,
+//         });
+//     }
 
-    try {
-        const decodedToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as { userId: string };        
-        (req as any).userId = decodedToken.userId;
-        next();
-    } catch (error) {
-        next(new UnauthorizedError({
-            code: 401,
-            message: "Invalid or expired refresh token",
-            logging: true,
-        }) );
-    }
-}
+//     try {
+//         const decodedToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as { userId: string };        
+//         (req as any).userId = decodedToken.userId;
+//         next();
+//     } catch (error) {
+//         next(new UnauthorizedError({
+//             code: 401,
+//             message: "Invalid or expired refresh token",
+//             logging: true,
+//         }) );
+//     }
+// }
