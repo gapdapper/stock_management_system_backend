@@ -20,8 +20,8 @@ import {
 import { SignatureRules } from "@/utils/sheets/rules";
 
 // #region Transaction
-export const getAllTransactions = async () => {
-  const transactions = await transactionRepository.getAllTransactions();
+export const getTransactions = async () => {
+  const transactions = await transactionRepository.findAllTransactions();
   if (!transactions) {
     throw new NotFoundError({
       code: 404,
@@ -33,7 +33,7 @@ export const getAllTransactions = async () => {
 };
 
 export const getTransactionById = async (transactionId: number) => {
-  const transaction = await transactionRepository.getTransactionById(
+  const transaction = await transactionRepository.findTransactionById(
     transactionId
   );
   if (!transaction) {
@@ -47,7 +47,7 @@ export const getTransactionById = async (transactionId: number) => {
 };
 
 export const getTransactionByOrderId = async (orderId: string) => {
-  const transaction = await transactionRepository.getTransactionByOrderId(
+  const transaction = await transactionRepository.findTransactionByOrderId(
     orderId
   );
   if (!transaction) {
@@ -80,7 +80,7 @@ export const getTransactionByOrderId = async (orderId: string) => {
 };
 
 export const editTransaction = async (transaction: ITransaction) => {
-  const updatedTransaction = await transactionRepository.editTransaction(
+  const updatedTransaction = await transactionRepository.updateTransaction(
     transaction
   );
   if (!updatedTransaction) {
@@ -94,14 +94,14 @@ export const editTransaction = async (transaction: ITransaction) => {
 };
 
 export const addTransaction = async (transaction: ITransaction) => {
-  const newTransaction = await transactionRepository.addTransaction(
+  const newTransaction = await transactionRepository.createTransaction(
     transaction
   );
   return newTransaction;
 };
 
 export const deleteTransaction = async (transactionId: number) => {
-  const transaction = await transactionRepository.getTransactionById(
+  const transaction = await transactionRepository.findTransactionById(
     transactionId
   );
   if (!transaction) {
@@ -111,14 +111,14 @@ export const deleteTransaction = async (transactionId: number) => {
       logging: false,
     });
   }
-  await transactionRepository.deleteTransaction(transactionId);
+  await transactionRepository.deleteTransactionById(transactionId);
 };
 // #endregion
 
 // #region Transaction Item
 
 export const getTransactionItemsById = async (transactionId: number) => {
-  const items = await transactionRepository.getTransactionItemsById(
+  const items = await transactionRepository.findTransactionItemsByTransactionId(
     transactionId
   );
   if (!items || items.length === 0) {
@@ -143,7 +143,7 @@ export const addTransactionItem = async (
     productVariantId,
     quantity,
   };
-  const newTransactionItem = await transactionRepository.addTransactionItem(
+  const newTransactionItem = await transactionRepository.createTransactionItem(
     transactionItem
   );
   return newTransactionItem;
@@ -162,7 +162,7 @@ export const editTransactionItem = async (
     quantity,
   };
   const updatedTransactionItem =
-    await transactionRepository.editTransactionItem(transactionItem);
+    await transactionRepository.updateTransactionItem(transactionItem);
   return updatedTransactionItem;
 };
 
@@ -293,7 +293,7 @@ export const processImportedTransactionFiles = async (
 
         // if orderId exists, update status only
         const existingTransaction =
-          await transactionRepository.getTransactionByOrderId(
+          await transactionRepository.findTransactionByOrderId(
             transaction.orderId
           );
 
@@ -337,7 +337,7 @@ export const processImportedTransactionFiles = async (
         } else {
           // may need to deduct stock if status changed from 'cancelled' to other status later
           if (existingTransaction[0]?.status !== transaction.status) {
-            await transactionRepository.editTransactionStatus(
+            await transactionRepository.updateTransactionStatus(
               transaction.orderId,
               transaction.status
             );
@@ -354,7 +354,7 @@ export const processImportedTransactionFiles = async (
 
     // bulk insert transactions
     const createdTransaction =
-      await transactionRepository.addMultipleTransactions(transactionBatch);
+      await transactionRepository.createManyTransactions(transactionBatch);
     if (!createdTransaction) {
       throw new Error("Failed to create transactions");
     }
@@ -369,7 +369,7 @@ export const processImportedTransactionFiles = async (
         delete item.orderId;
       }
     }
-    await transactionRepository.addMultipleTransactionItems(
+    await transactionRepository.createManyTransactionItems(
       transactionItemBatch
     );
 

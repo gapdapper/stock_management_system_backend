@@ -4,7 +4,7 @@ import type { TransactionStatus } from "@/models/transaction";
 import { and, eq, sql, desc } from "drizzle-orm";
 
 // #region Transaction
-export const getAllTransactions = async () => {
+export const findAllTransactions = async () => {
   const transactions = await db
     .selectDistinctOn([schema.transaction.orderId],{
       id: schema.transaction.id,
@@ -36,14 +36,14 @@ export const getAllTransactions = async () => {
   return transactions;
 };
 
-export const getTransactionById = async (transactionId: number) => {
+export const findTransactionById = async (transactionId: number) => {
   const transaction = await db.query.transaction.findFirst({
     where: eq(schema.transaction.id, transactionId),
   });
   return transaction;
 };
 
-export const getTransactionByOrderId = async (orderId: string) => {
+export const findTransactionByOrderId = async (orderId: string) => {
   const transaction = await db
     .select({
       orderId: schema.transaction.orderId,
@@ -92,7 +92,7 @@ export const getTransactionByOrderId = async (orderId: string) => {
   return transaction;
 };
 
-export const editTransaction = async (transaction: any) => {
+export const updateTransaction = async (transaction: any) => {
   const result = await db
     .update(schema.transaction)
     .set({
@@ -109,7 +109,7 @@ export const editTransaction = async (transaction: any) => {
   return result;
 };
 
-export const editTransactionStatus = async (
+export const updateTransactionStatus = async (
   orderId: string,
   status: TransactionStatus
 ) => {
@@ -124,7 +124,7 @@ export const editTransactionStatus = async (
   return result;
 };
 
-export const addTransaction = async (transaction: any) => {
+export const createTransaction = async (transaction: any) => {
   const result = await db
     .insert(schema.transaction)
     .values(transaction)
@@ -135,7 +135,7 @@ export const addTransaction = async (transaction: any) => {
   return result[0];
 };
 
-export const addMultipleTransactions = async (transactions: any[]) => {
+export const createManyTransactions = async (transactions: any[]) => {
   const result = await db
     .insert(schema.transaction)
     .values(transactions)
@@ -146,7 +146,7 @@ export const addMultipleTransactions = async (transactions: any[]) => {
   return result;
 };
 
-export const deleteTransaction = async (transactionId: number) => {
+export const deleteTransactionById = async (transactionId: number) => {
   await db
     .delete(schema.transaction)
     .where(eq(schema.transaction.id, transactionId))
@@ -157,14 +157,14 @@ export const deleteTransaction = async (transactionId: number) => {
 // #endregion
 
 // #region Transaction Item
-export const getTransactionItemsById = async (transactionId: number) => {
+export const findTransactionItemsByTransactionId = async (transactionId: number) => {
   const items = await db.query.transactionItem.findMany({
     where: eq(schema.transactionItem.transactionId, transactionId),
   });
   return items;
 };
 
-export const addTransactionItem = async (transactionItem: any) => {
+export const createTransactionItem = async (transactionItem: any) => {
   const result = await db
     .insert(schema.transactionItem)
     .values(transactionItem)
@@ -172,7 +172,7 @@ export const addTransactionItem = async (transactionItem: any) => {
   return result[0];
 };
 
-export const addMultipleTransactionItems = async (transactionItems: any[]) => {
+export const createManyTransactionItems = async (transactionItems: any[]) => {
   const result = await db
     .insert(schema.transactionItem)
     .values(transactionItems)
@@ -180,7 +180,7 @@ export const addMultipleTransactionItems = async (transactionItems: any[]) => {
   return result;
 };
 
-export const editTransactionItem = async (transactionItem: any) => {
+export const updateTransactionItem = async (transactionItem: any) => {
   const result = await db
     .update(schema.transactionItem)
     .set({

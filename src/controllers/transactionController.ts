@@ -4,7 +4,7 @@ import * as transactionService from "@/services/transactionService"
 // #region Transaction
 export const getTransaction = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const results = await transactionService.getAllTransactions();
+        const results = await transactionService.getTransactions();
         return res.status(200).json({ transactions: results });
     } catch (error) {
         next(error);
