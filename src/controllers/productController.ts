@@ -1,4 +1,5 @@
 import * as productService from "@/services/productService";
+import * as imageService from "@/services/imageService";
 import type { Request, Response, NextFunction } from "express";
 
 export const getAllProducts = async (
@@ -96,7 +97,7 @@ export const uploadProductImage = async (
       return res.status(400).json({ message: "No files uploaded" });
     }
     const productId = Number(req.params.id);
-    const result = await productService.uploadProductImage(productId, file);
+    const result = await imageService.uploadProductImage("product", productId, file);
     return res.status(200).json({ result });
   } catch (error) {
     next(error);
