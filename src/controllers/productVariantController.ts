@@ -1,10 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import * as productVariantService from '@/services/productVariantService';
+import * as imageService from '@/services/imageService';
 
 export const editProductVariant = async (req: Request, res: Response, next: NextFunction) => {
-    const productVariantId = Number(req.params.id);
+    const variantId = Number(req.params.id);
     const editedData = req.body;
-    const updatedProduct = { ...editedData, id: productVariantId };
+    const updatedProduct = { ...editedData, id: variantId };
     try {
         const result = await productVariantService.editProductVariant(updatedProduct);
         return res.status(200).json({ result });
@@ -39,8 +40,8 @@ export const uploadProductVariantImage = async (
     if (!file) {
       return res.status(400).json({ message: "No files uploaded" });
     }
-    const productId = Number(req.params.id);
-    const result = await productVariantService.uploadProductImage(productId, file);
+    const variantId = Number(req.params.id);
+    const result = await imageService.uploadProductImage("variant", variantId, file)
     return res.status(200).json({ result });
   } catch (error) {
     next(error);
