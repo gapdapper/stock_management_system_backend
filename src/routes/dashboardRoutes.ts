@@ -1,8 +1,9 @@
 import express from 'express';
-import { getDashboardOverview } from "@/controllers/dashboardController"
+import { getDashboardOverview, getAvailableMonths } from "@/controllers/dashboardController"
 
 const router = express.Router();
 
-router.get('/', getDashboardOverview);
+router.get('/overview/:month', getDashboardOverview);
+router.get('/months', getAvailableMonths);
 
 export default router;

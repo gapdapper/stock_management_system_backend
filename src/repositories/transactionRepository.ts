@@ -1,17 +1,18 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
 import type { TransactionStatus } from "@/models/transaction";
-import { and, eq, sql, desc } from "drizzle-orm";
+import { and, eq, sql, desc, gte, lt, inArray } from "drizzle-orm";
 
 // #region Transaction
 export const findAllTransactions = async () => {
   const transactions = await db
-    .selectDistinctOn([schema.transaction.orderId],{
+    .selectDistinctOn([schema.transaction.orderId], {
       id: schema.transaction.id,
       orderId: schema.transaction.orderId,
       buyer: schema.transaction.buyer,
       status: schema.transaction.status,
       createdAt: schema.transaction.createdAt,
+      updatedAt: schema.transaction.updatedAt,
       paymentType: schema.paymentType.paymentType,
       platform: schema.platform.platformName,
       note: schema.transaction.note,
@@ -19,19 +20,16 @@ export const findAllTransactions = async () => {
     .from(schema.transaction)
     .innerJoin(
       schema.paymentType,
-      eq(schema.transaction.paymentTypeId, schema.paymentType.id)
+      eq(schema.transaction.paymentTypeId, schema.paymentType.id),
     )
     .innerJoin(
       schema.platform,
-      eq(schema.transaction.platformId, schema.platform.id)
+      eq(schema.transaction.platformId, schema.platform.id),
     )
-    .orderBy(
-      schema.transaction.orderId,
-      desc(schema.transaction.createdAt) 
-    );
+    .orderBy(schema.transaction.orderId, desc(schema.transaction.createdAt));
 
-      if (!transactions) {
-    throw new Error("Failed to get transaction")
+  if (!transactions) {
+    throw new Error("Failed to get transaction");
   }
   return transactions;
 };
@@ -62,31 +60,31 @@ export const findTransactionByOrderId = async (orderId: string) => {
     .from(schema.transaction)
     .innerJoin(
       schema.paymentType,
-      eq(schema.transaction.paymentTypeId, schema.paymentType.id)
+      eq(schema.transaction.paymentTypeId, schema.paymentType.id),
     )
     .innerJoin(
       schema.platform,
-      eq(schema.transaction.platformId, schema.platform.id)
+      eq(schema.transaction.platformId, schema.platform.id),
     )
     .innerJoin(
       schema.transactionItem,
-      eq(schema.transaction.id, schema.transactionItem.transactionId)
+      eq(schema.transaction.id, schema.transactionItem.transactionId),
     )
     .innerJoin(
       schema.product,
-      eq(schema.transactionItem.productId, schema.product.id)
+      eq(schema.transactionItem.productId, schema.product.id),
     )
     .innerJoin(
       schema.productVariant,
-      eq(schema.transactionItem.productVariantId, schema.productVariant.id)
+      eq(schema.transactionItem.productVariantId, schema.productVariant.id),
     )
     .innerJoin(
       schema.productColor,
-      eq(schema.productVariant.colorId, schema.productColor.id)
+      eq(schema.productVariant.colorId, schema.productColor.id),
     )
     .innerJoin(
       schema.productSize,
-      eq(schema.productVariant.sizeId, schema.productSize.id)
+      eq(schema.productVariant.sizeId, schema.productSize.id),
     )
     .where(eq(schema.transaction.orderId, orderId));
   return transaction;
@@ -111,7 +109,7 @@ export const updateTransaction = async (transaction: any) => {
 
 export const updateTransactionStatus = async (
   orderId: string,
-  status: TransactionStatus
+  status: TransactionStatus,
 ) => {
   const result = await db
     .update(schema.transaction)
@@ -157,7 +155,9 @@ export const deleteTransactionById = async (transactionId: number) => {
 // #endregion
 
 // #region Transaction Item
-export const findTransactionItemsByTransactionId = async (transactionId: number) => {
+export const findTransactionItemsByTransactionId = async (
+  transactionId: number,
+) => {
   const items = await db.query.transactionItem.findMany({
     where: eq(schema.transactionItem.transactionId, transactionId),
   });
@@ -190,8 +190,8 @@ export const updateTransactionItem = async (transactionItem: any) => {
     .where(
       and(
         eq(schema.transactionItem.transactionId, transactionItem.transactionId),
-        eq(schema.transactionItem.productId, transactionItem.productId)
-      )
+        eq(schema.transactionItem.productId, transactionItem.productId),
+      ),
     )
     .returning();
   return result;
@@ -200,7 +200,7 @@ export const updateTransactionItem = async (transactionItem: any) => {
 export const deleteTransactionItem = async (
   transactionId: number,
   productId: number,
-  productVariantId: number
+  productVariantId: number,
 ) => {
   await db
     .delete(schema.transactionItem)
@@ -208,26 +208,40 @@ export const deleteTransactionItem = async (
       and(
         eq(schema.transactionItem.transactionId, transactionId),
         eq(schema.transactionItem.productId, productId),
-        eq(schema.transactionItem.productVariantId, productVariantId)
-      )
+        eq(schema.transactionItem.productVariantId, productVariantId),
+      ),
     );
 };
 // #endregion
 
 // #region Dashboard
-export const countOrders = async () => {
-  return db.select({ count: sql<number>`count(*)` }).from(schema.transaction);
+export const countOrders = async (start: Date, end: Date) => {
+  return db
+    .select({ count: sql<number>`count(*)` })
+    .from(schema.transaction)
+    .where(
+      and(
+        gte(schema.transaction.createdAt, start),
+        lt(schema.transaction.createdAt, end),
+      ),
+    );
 };
 
-export const sumUnitsSold = async () => {
+export const sumUnitsSold = async (start: Date, end: Date) => {
   return db
     .select({
       total: sql<number>`sum(${schema.transactionItem.quantity})`,
     })
-    .from(schema.transactionItem);
+    .from(schema.transactionItem)
+    .where(
+      and(
+        gte(schema.transactionItem.createdAt, start),
+        lt(schema.transactionItem.createdAt, end),
+      ),
+    );
 };
 
-export const topSoldProducts = async () => {
+export const topSoldProducts = async (start: Date, end: Date) => {
   const totalSold = sql<number>`sum(${schema.transactionItem.quantity})`;
 
   return db
@@ -239,14 +253,20 @@ export const topSoldProducts = async () => {
     .from(schema.transactionItem)
     .innerJoin(
       schema.product,
-      eq(schema.transactionItem.productId, schema.product.id)
+      eq(schema.transactionItem.productId, schema.product.id),
+    )
+    .where(
+      and(
+        gte(schema.transactionItem.createdAt, start),
+        lt(schema.transactionItem.createdAt, end),
+      ),
     )
     .groupBy(schema.product.id, schema.product.productName)
     .orderBy(desc(totalSold))
     .limit(5);
 };
 
-export const salesByPlatform = async () => {
+export const salesByPlatform = async (start: Date, end: Date) => {
   return db
     .select({
       platform: schema.platform.platformName,
@@ -255,12 +275,18 @@ export const salesByPlatform = async () => {
     .from(schema.transaction)
     .leftJoin(
       schema.platform,
-      eq(schema.transaction.platformId, schema.platform.id)
+      eq(schema.transaction.platformId, schema.platform.id),
+    )
+    .where(
+      and(
+        gte(schema.transaction.createdAt, start),
+        lt(schema.transaction.createdAt, end),
+      ),
     )
     .groupBy(schema.platform.platformName);
 };
 
-export const getOrderStatusBreakdown = async () => {
+export const getOrderStatusBreakdown = async (start: Date, end: Date) => {
   return db
     .select({
       status: schema.transaction.status,
@@ -268,7 +294,11 @@ export const getOrderStatusBreakdown = async () => {
     })
     .from(schema.transaction)
     .where(
-      sql`${schema.transaction.status} in ('completed', 'cancelled', 'returned')`
+      and(
+        gte(schema.transaction.createdAt, start),
+        lt(schema.transaction.createdAt, end),
+      ),
     )
+
     .groupBy(schema.transaction.status);
 };
