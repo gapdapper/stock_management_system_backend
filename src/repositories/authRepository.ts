@@ -83,10 +83,3 @@ export const getUserProfileById = async (userId: number): Promise<Partial<IUser>
   });
   return user;
 }
-
-export const findAllUsername = async () => {
-  const usernames = await db.select({
-    username: schema.users.username
-  }).from(schema.users);
-  return usernames;
-}

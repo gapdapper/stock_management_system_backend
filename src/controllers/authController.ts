@@ -29,13 +29,21 @@ export const register = async (
   }
 };
 
-export const getAllUsernames = async (
+export const checkAvailableUsernames = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const result = await authService.getAllUsernames();
+    const { username } = req.query;
+    if (!username || typeof username !== "string") {
+      throw new BadRequestError({
+        code: 400,
+        message: "Username is required and must be a string!",
+        logging: true,
+      });
+    }
+    const result = await authService.checkAvailableUsernames(username);
     res.status(200).json(result);
   } catch (error) {
     next(error);
