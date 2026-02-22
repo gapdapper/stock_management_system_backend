@@ -5,11 +5,11 @@ import BadRequestError from "@/utils/errors/bad-request";
 export const register = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const { username, password, firstName, lastName } = req.body;
-    if (!username || !password || !firstName || !lastName) {
+    const { username, password, role } = req.body;
+    if (!username || !password || !role) {
       throw new BadRequestError({
         code: 400,
         message: "All fields are required!",
@@ -19,8 +19,7 @@ export const register = async (
     const result = await authService.registerUser({
       username,
       password,
-      firstName,
-      lastName,
+      role,
     });
     res
       .status(201)
@@ -30,10 +29,23 @@ export const register = async (
   }
 };
 
+export const getAllUsernames = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await authService.getAllUsernames();
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const login = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { username, password } = req.body;
   try {
@@ -69,7 +81,7 @@ export const login = async (
 export const logout = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   console.log("Cookies before clearing:", req.cookies);
   const { refreshToken } = req.cookies;
@@ -91,7 +103,7 @@ export const logout = async (
 export const refreshToken = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -99,9 +111,8 @@ export const refreshToken = async (
     return res.status(401).json({ message: "Refresh token not provided" });
   }
 
-  const { newAccessToken, newRefreshToken } = await authService.refreshToken(
-    refreshToken
-  );
+  const { newAccessToken, newRefreshToken } =
+    await authService.refreshToken(refreshToken);
 
   res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
@@ -116,7 +127,7 @@ export const refreshToken = async (
 export const getProfile = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const authHeader = req.headers.authorization;

@@ -10,8 +10,6 @@ export const users = pgTable("users", {
   username: t.varchar().notNull(),
   password: t.varchar().notNull(),
   role: roles().notNull(),
-  firstName: t.varchar("first_name").notNull(),
-  lastName: t.varchar("last_name").notNull(),
   createdAt: t.timestamp("created_at").defaultNow(),
 });
 

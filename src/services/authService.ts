@@ -6,6 +6,7 @@ import UnauthorizedError from "@/utils/errors/unauthorized";
 import crypto from "crypto";
 
 export const registerUser = async (user: any): Promise<{ id: number }> => {
+  console.log(user)
   const isUsernameExist = await authRepository.findUserByUsername(
     user.username
   );
@@ -171,4 +172,9 @@ export const getUserProfile = async (token: string): Promise<any> => {
     });
   }
   return userProfile;
+}
+
+export const getAllUsernames = async () => {
+  const usernames = await authRepository.findAllUsername();
+  return usernames.map((u) => {return u.username});
 }

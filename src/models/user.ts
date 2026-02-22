@@ -6,8 +6,6 @@ export interface IUser {
     password: string;
     role: UserRole;
     refreshToken?: string | null;
-    firstName: string;
-    lastName: string;
 }
 
 export interface IRefreshToken {

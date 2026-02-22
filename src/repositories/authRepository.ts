@@ -23,9 +23,7 @@ export const addUser = async (user: IUser): Promise<{ id: number }> => {
     .values({
       username: user.username,
       password: user.password,
-      role: "user",
-      firstName: user.firstName,
-      lastName: user.lastName,
+      role: user.role,
     }).returning({ id: schema.users.id });
   return result[0]!;
 };
@@ -81,9 +79,14 @@ export const getUserProfileById = async (userId: number): Promise<Partial<IUser>
       id: true,
       username: true,
       role: true,
-      firstName: true,
-      lastName: true,
     },
   });
   return user;
+}
+
+export const findAllUsername = async () => {
+  const usernames = await db.select({
+    username: schema.users.username
+  }).from(schema.users);
+  return usernames;
 }
