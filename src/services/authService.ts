@@ -84,7 +84,14 @@ export const logoutUser = async (refreshToken: string): Promise<void> => {
     .update(refreshToken)
     .digest("hex");
 
-  await authRepository.revokeRefreshTokenByHashed(tokenHash);
+  const result = authRepository.revokeRefreshTokenByHashed(tokenHash);
+  if(!result) {
+    throw new UnauthorizedError({
+      code: 401,
+      message: "Invalid refresh token",
+      logging: true,
+    });
+  }
 };
 
 export const refreshToken = async (

@@ -18,9 +18,11 @@ import {
   variantIdFinder,
 } from "@/utils/sheets/sheet";
 import { SignatureRules } from "@/utils/sheets/rules";
+import BadRequestError from "@/utils/errors/bad-request";
 
 // #region Transaction
 export const getTransactions = async () => {
+  await dailyUploadLogRepository.updateDailyUploadLog(new Date());
   const transactions = await transactionRepository.findAllTransactions();
   if (!transactions) {
     throw new NotFoundError({
@@ -183,6 +185,15 @@ export const deleteTransactionItem = async (
 export const processImportedTransactionFiles = async (
   files: Express.Multer.File[]
 ) => {
+  if(!files){
+        throw new BadRequestError({
+        code: 400,
+        message: "transaction file is required",
+        logging: true,
+      });
+  }
+
+
   let transactionBatch: ITransaction[] = [];
   let transactionItemBatch: ITransactionItem[] = [];
   let itemQuantity: { productVariantId: number; quantity: number }[] = [];

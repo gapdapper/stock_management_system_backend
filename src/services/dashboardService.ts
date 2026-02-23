@@ -1,6 +1,14 @@
 import * as transactionRepository from "@/repositories/transactionRepository";
+import BadRequestError from "@/utils/errors/bad-request";
 
 export const getDashboardStats = async (month: string) => {
+  if(!month) {
+          throw new BadRequestError({
+            code: 400,
+            message: "Month is required",
+            logging: true,
+          });
+  }
   const splittedMonth = month.split("-")
   const start = new Date(`${splittedMonth[0]}-${splittedMonth[1]}-1`)
   const end = Number(splittedMonth[1]) != 12 ? new Date(`${splittedMonth[0]}-${Number(splittedMonth[1])+1}-1`) : new Date(`${Number(splittedMonth[0])+1}-1-1`); 

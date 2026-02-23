@@ -96,7 +96,8 @@ export const getProductById = async (productId: number) => {
 };
 
 export const editProduct = async (product: IProduct) => {
-  const updatedProduct = await productRepository.updateById(product.id, product);
+  const {id, ...formattedProduct} = product;
+  const updatedProduct = await productRepository.updateById(product.id, formattedProduct);
   if (!updatedProduct) {
     throw new NotFoundError({
       code: 404,
