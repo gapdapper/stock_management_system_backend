@@ -134,6 +134,106 @@ async function main() {
 
   await db.insert(schema.transactionItem).values(transactionItems);
 
+    /* ========================
+     7. EXTRA TRANSACTIONS (2026/01)
+  ======================== */
+
+const januaryTransactions = await db
+  .insert(schema.transaction)
+  .values([
+    {
+      orderId: "ORD-2026-001",
+      buyer: "January Buyer 1",
+      paymentTypeId: 1,
+      platformId: 1,
+      status: "completed",
+      note: "January test 1",
+      createdAt: new Date("2026-01-10T10:00:00Z"),
+    },
+    {
+      orderId: "ORD-2026-002",
+      buyer: "January Buyer 2",
+      paymentTypeId: 2,
+      platformId: 2,
+      status: "completed",
+      note: "January test 2",
+      createdAt: new Date("2026-01-20T14:30:00Z"),
+    },
+  ])
+  .returning({
+    id: schema.transaction.id,
+    createdAt: schema.transaction.createdAt,
+  });
+
+  /* ========================
+     8. TRANSACTION ITEMS (2026/01)
+  ======================== */
+
+await db.insert(schema.transactionItem).values([
+  {
+    transactionId: januaryTransactions[0]!.id!,
+    productId: 1,
+    productVariantId: 1,
+    quantity: 3,
+    createdAt: januaryTransactions[0]!.createdAt!,
+  },
+  {
+    transactionId: januaryTransactions[1]!.id!,
+    productId: 2,
+    productVariantId: 2,
+    quantity: 4,
+    createdAt: januaryTransactions[1]!.createdAt!,
+  },
+]);
+
+/* ========================
+   9. EXTRA TRANSACTIONS (2026/02 - 25 TOTAL)
+======================== */
+
+const februaryTransactionsData = Array.from({ length: 25 }).map((_, i) => ({
+  orderId: `ORD-2026-02-${String(i + 1).padStart(3, "0")}`,
+  buyer: `February Buyer ${i + 1}`,
+  paymentTypeId: (i % 2) + 1,
+  platformId: (i % 2) + 1,
+  status: statuses[i % statuses.length],
+  note: `February 2026 transaction ${i + 1}`,
+  createdAt: new Date(
+    `2026-02-${String((i % 28) + 1).padStart(2, "0")}T10:00:00Z`
+  ),
+}));
+
+const februaryTransactions = await db
+  .insert(schema.transaction)
+  .values(februaryTransactionsData)
+  .returning({
+    id: schema.transaction.id,
+    createdAt: schema.transaction.createdAt,
+  });
+
+/* ========================
+   10. TRANSACTION ITEMS (2026/02)
+======================== */
+
+const februaryItems = [];
+
+for (let i = 0; i < februaryTransactions.length; i++) {
+  const numberOfItems = (i % 3) + 1; // 1–3 items per transaction
+
+  for (let j = 0; j < numberOfItems; j++) {
+    const productId = ((i + j) % 25) + 1;
+
+    februaryItems.push({
+      transactionId: februaryTransactions[i]!.id!,
+      productId: productId,
+      productVariantId: productId,
+      quantity: (j + 1) * 2,
+      createdAt: februaryTransactions[i]!.createdAt!,
+    });
+  }
+}
+
+await db.insert(schema.transactionItem).values(februaryItems);
+
   console.log("TEST seeding completed.");
 }
 
