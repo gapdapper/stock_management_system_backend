@@ -53,35 +53,34 @@ export const checkAvailableUsernames = async (
 export const login = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const { username, password } = req.body;
+
   try {
+    // Required field validation (SRS-71)
     if (!username || !password) {
       throw new BadRequestError({
-        code: 400,
         message: "Username and password are required!",
         logging: true,
       });
     }
-    const { accessToken, refreshToken } = await authService.loginUser({
-      username,
-      password,
-    });
+
+    const { accessToken, refreshToken } =
+      await authService.loginUser({ username, password });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE), // 24 hours is mileseconds
+      maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE),
       sameSite: "strict",
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       accessToken,
       message: "Login successful",
     });
   } catch (error) {
-    console.error("Login error:", error);
     next(error);
   }
 };
