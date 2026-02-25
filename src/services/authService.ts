@@ -6,6 +6,16 @@ import UnauthorizedError from "@/utils/errors/unauthorized";
 import crypto from "crypto";
 
 export const registerUser = async (user: any): Promise<{ id: number }> => {
+  const usernameRegex = /^[a-zA-Z0-9]{4,20}$/;
+  const passwordRegex = /^[a-zA-Z0-9]{8,20}$/;
+
+  if (!usernameRegex.test(user.username) || !passwordRegex.test(user.password)) {
+    throw new BadRequestError({
+      message: "Invalid input format.",
+      logging: true,
+    });
+  }
+
   const isUsernameExist = await authRepository.findUserByUsername(
     user.username
   );
@@ -32,7 +42,6 @@ export const loginUser = async (credentials: {
 }): Promise<{ accessToken: string; refreshToken: string }> => {
   const { username, password } = credentials;
 
-  // 🔎 Validate format (ตาม SRS 72–75)
   const usernameRegex = /^[a-zA-Z0-9]{4,20}$/;
   const passwordRegex = /^[a-zA-Z0-9]{8,20}$/;
 
