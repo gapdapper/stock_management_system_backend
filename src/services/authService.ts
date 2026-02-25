@@ -62,7 +62,9 @@ export const loginUser = async (credentials: {
   }
 
   const accessToken = jwt.sign(
-    { sub: user.id.toString() },
+    { sub: user.id.toString(),
+      role: user.role,
+     },
     process.env.ACCESS_TOKEN_SECRET as string,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION } as SignOptions
   );
