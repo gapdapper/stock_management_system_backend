@@ -136,3 +136,4 @@ describe("UTC-01-07: getAllProductsWithVariant()", () => {
       .toThrow("DB error");
   });
 });
+
