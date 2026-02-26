@@ -20,7 +20,7 @@ export const getAllProducts = async () => {
 export const getAllProductsWithVariant = async () => {
   const rows: IProductRow[] =
     await productRepository.findAllWithVariant();
-  if (!rows) {
+  if (!rows.length) {
     throw new NotFoundError({
       code: 404,
       message: "No products found",
