@@ -97,7 +97,7 @@ export const uploadProductImage = async (
       return res.status(400).json({ message: "No files uploaded" });
     }
     const productId = Number(req.params.id);
-    const result = await imageService.uploadProductImage("product", productId, file);
+    const result = await imageService.uploadImage("product", productId, file);
     return res.status(200).json({ result });
   } catch (error) {
     next(error);

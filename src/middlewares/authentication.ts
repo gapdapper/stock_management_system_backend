@@ -30,9 +30,9 @@ export const authenticateUser = (
   }
 
   try {
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { sub: string };
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { sub: string, role: string };
 
-    (req as any).user = { id: decodedToken.sub };
+    (req as any).user = { id: decodedToken.sub, role: decodedToken.role };
     next();
   } catch (error) {
     next(new UnauthorizedError({

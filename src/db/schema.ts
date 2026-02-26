@@ -7,11 +7,9 @@ export const status = t.pgEnum("status", ["order placed", "shipped", "delivered"
 
 export const users = pgTable("users", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-  username: t.varchar().notNull(),
+  username: t.varchar().notNull().unique(),
   password: t.varchar().notNull(),
   role: roles().notNull(),
-  firstName: t.varchar("first_name").notNull(),
-  lastName: t.varchar("last_name").notNull(),
   createdAt: t.timestamp("created_at").defaultNow(),
 });
 

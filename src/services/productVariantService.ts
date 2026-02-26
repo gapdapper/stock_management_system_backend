@@ -1,25 +1,68 @@
 import type { IProductVariant } from "@/models/product";
-import * as productVariantRepository from "@/repositories/productVariantRepository"
+import * as productVariantRepository from "@/repositories/productVariantRepository";
 import NotFoundError from "@/utils/errors/not-found";
 import { supabase } from "@/db/supabase";
 import sharp from "sharp";
+import BadRequestError from "@/utils/errors/bad-request";
 
 export const editProductVariant = async (product: IProductVariant) => {
-  const updatedProduct: IProductVariant[] = await productVariantRepository.updateById(product.id, product);
-  if (!updatedProduct) {
+  if (!product) {
+    throw new NotFoundError({
+      code: 404,
+      message: "No product provided",
+      logging: false,
+    });
+  }
+  const { id, createdAt, ...updateData } = product;
+  if (product.qty < 0 || product.minStock < 0) {
+    throw new BadRequestError({
+      code: 400,
+      message: `Incorrect value`,
+      logging: false,
+    });
+  }
+  const updatedProduct: IProductVariant[] =
+    await productVariantRepository.updateById(product.id, updateData);
+  if (!updatedProduct.length) {
     throw new NotFoundError({
       code: 404,
       message: `Product with ID ${product.id} not found`,
       logging: false,
     });
   }
-  return updatedProduct;
-}
+  return { message: "success" };
+};
 
 export const restockProductVariant = async (productVariants: any) => {
-  const updatedProduct = await productVariantRepository.updateQuantitiesByIds(productVariants);
-  return updatedProduct;
-}
+  console.log(productVariants)
+  if (!Array.isArray(productVariants) || productVariants.length === 0) {
+    throw new BadRequestError({
+      code: 400,
+      message: "Product variant ID is required",
+      logging: false,
+    });
+  }
+
+  for (const variant of productVariants) {
+    if (!variant.variantId) {
+      throw new BadRequestError({
+        code: 400,
+        message: "Product variant ID is required",
+        logging: false,
+      });
+    }
+
+    if (variant.qty == null || variant.qty <= 0) {
+      throw new BadRequestError({
+        code: 400,
+        message: "Quantity must be greater than 0",
+        logging: false,
+      });
+    }
+  }
+  await productVariantRepository.updateQuantitiesByIds(productVariants);
+  return { message: "success" };
+};
 
 export const uploadProductImage = async (
   variantId: number,
