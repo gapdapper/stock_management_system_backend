@@ -14,7 +14,7 @@ jest.mock("@/db/connect", () => ({
       },
     },
     transaction: mockTransaction,
-    update: mockUpdate, // ✅ เพิ่มตรงนี้
+    update: mockUpdate,
   },
 }));
 
@@ -34,7 +34,8 @@ jest.mock("@/db/schema", () => ({
 import {
   findById,
   updateQuantitiesByIds,
-  updateById
+  updateById,
+  updateQuantityById
 } from "@/repositories/productVariantRepository";
 
 
@@ -204,5 +205,77 @@ describe("UTC-01-14: updateById()", () => {
     await expect(updateById(1, { qty: 10 }))
       .rejects
       .toThrow("DB Error");
+  });
+});
+
+// #region UTC-04-09
+describe("UTC-04-09: updateQuantityById()", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockUpdate.mockReturnValue({
+      set: mockSet,
+    });
+
+    mockSet.mockReturnValue({
+      where: mockWhere,
+    });
+
+    mockWhere.mockReturnValue({
+      returning: mockReturning,
+    });
+  });
+
+  it("ID-01: Should increase quantity and return updated row", async () => {
+    const id = 1;
+    const quantityChange = 5;
+
+    const mockResult = [
+      { id: 1, qty: 15 },
+    ];
+
+    mockReturning.mockResolvedValue(mockResult);
+
+    const result = await updateQuantityById(id, quantityChange);
+
+    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAt: expect.any(Date),
+      }),
+    );
+    expect(mockWhere).toHaveBeenCalled();
+    expect(result).toEqual(mockResult);
+  });
+
+  it("ID-02: Should decrease quantity and return updated row", async () => {
+    const id = 1;
+    const quantityChange = -3;
+
+    const mockResult = [
+      { id: 1, qty: 7 },
+    ];
+
+    mockReturning.mockResolvedValue(mockResult);
+
+    const result = await updateQuantityById(id, quantityChange);
+
+    expect(result).toEqual(mockResult);
+  });
+
+  it("ID-03: Should return empty array if no variant found", async () => {
+    mockReturning.mockResolvedValue([]);
+
+    const result = await updateQuantityById(999, 5);
+
+    expect(result).toEqual([]);
+  });
+
+  it("ID-04: Should throw error when database fails", async () => {
+    mockReturning.mockRejectedValue(new Error("Database error"));
+
+    await expect(updateQuantityById(1, 5))
+      .rejects
+      .toThrow("Database error");
   });
 });

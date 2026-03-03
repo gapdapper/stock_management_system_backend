@@ -9,17 +9,25 @@ const mockOrderBy = jest.fn();
 const mockLimit = jest.fn();
 const mockInnerJoin1 = jest.fn();
 const mockInnerJoin2 = jest.fn();
+const mockUpdate = jest.fn();
+const mockSet = jest.fn();
+const mockReturning = jest.fn();
+const mockInsert = jest.fn();
+const mockValues = jest.fn();
 
 jest.mock("@/db/connect", () => ({
   __esModule: true,
   default: {
     select: mockSelect,
     selectDistinctOn: mockSelectDistinctOn,
+    update: mockUpdate,
+    insert: mockInsert,
   },
 }));
 
+
 import db from "@/db/connect";
-import { countOrders, sumUnitsSold, topSoldProducts, salesByPlatform, getOrderStatusBreakdown, findAllTransactions } from "@/repositories/transactionRepository";
+import { countOrders, sumUnitsSold, topSoldProducts, salesByPlatform, getOrderStatusBreakdown, findAllTransactions, findTransactionByOrderId, updateTransactionStatus, createManyTransactions, createManyTransactionItems } from "@/repositories/transactionRepository";
 
 // #region UTC-02-05
 describe("UTC-02-05: countOrders()", () => {
@@ -318,8 +326,8 @@ describe("UTC-TRX-03: getOrderStatusBreakdown()", () => {
   });
 });
 
-// #region UTC-02-10
-describe("UTC-TRX-04: findAllTransactions()", () => {
+// #region UTC-02-10 & UTC-03-05
+describe("UTC-02-10 & UTC-03-05: findAllTransactions()", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -381,5 +389,252 @@ describe("UTC-TRX-04: findAllTransactions()", () => {
     mockSelectDistinctOn.mockReturnValue({ from: mockFrom });
 
     await expect(findAllTransactions()).rejects.toThrow("DB Error");
+  });
+});
+
+
+beforeEach(() => {
+  jest.clearAllMocks();
+
+  mockSelect.mockReturnValue({
+    from: mockFrom,
+  });
+
+  mockFrom.mockReturnValue({
+    innerJoin: mockInnerJoin,
+  });
+
+  // chain innerJoin หลายครั้งให้ return ตัวเอง
+  mockInnerJoin.mockReturnValue({
+    innerJoin: mockInnerJoin,
+    where: mockWhere,
+  });
+});
+
+// #region UTC-03-06 & UTC-04-05
+describe("UTC-03-06 & UTC-04-05: findTransactionByOrderId()", () => {
+
+  it("TC-01: should return transaction rows when query succeeds", async () => {
+    const mockData = [
+      {
+        orderId: "ORD001",
+        buyer: "John",
+        status: "completed",
+        createdAt: new Date("2024-01-01"),
+        paymentType: "credit card",
+        platform: "Shopee",
+        variantId: 1,
+        productName: "T-Shirt",
+        size: "Size M",
+        color: "Black",
+        quantity: 2,
+      },
+    ];
+
+    mockWhere.mockResolvedValue(mockData);
+
+    const result = await findTransactionByOrderId("ORD001");
+
+    expect(db.select).toHaveBeenCalledTimes(1);
+    expect(mockFrom).toHaveBeenCalledTimes(1);
+    expect(mockInnerJoin).toHaveBeenCalled();
+    expect(mockWhere).toHaveBeenCalledTimes(1);
+
+    expect(result).toEqual(mockData);
+  });
+
+  it("TC-02: should return empty array when no rows found", async () => {
+    mockWhere.mockResolvedValue([]);
+
+    const result = await findTransactionByOrderId("ORD999");
+
+    expect(result).toEqual([]);
+  });
+
+  it("TC-03: should propagate error when query fails", async () => {
+    const mockError = new Error("Database error");
+
+    mockWhere.mockRejectedValue(mockError);
+
+    await expect(
+      findTransactionByOrderId("ORD001")
+    ).rejects.toThrow("Database error");
+  });
+});
+
+// #region UTC-04-06
+describe("UTC-04-06: updateTransactionStatus()", () => {
+  const orderId = "ORD-001";
+  const status = "PAID" as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockUpdate.mockReturnValue({
+      set: mockSet,
+    });
+
+    mockSet.mockReturnValue({
+      where: mockWhere,
+    });
+
+    mockWhere.mockReturnValue({
+      returning: mockReturning,
+    });
+  });
+
+  it("ID-01: Should update status and return updated row", async () => {
+    const mockResult = [
+      {
+        orderId: "ORD-001",
+        status: "PAID",
+      },
+    ];
+
+    mockReturning.mockResolvedValue(mockResult);
+
+    const result = await updateTransactionStatus(orderId, status);
+
+    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: status,
+        updatedAt: expect.any(Date),
+      }),
+    );
+    expect(mockWhere).toHaveBeenCalled();
+    expect(mockReturning).toHaveBeenCalled();
+
+    expect(result).toEqual(mockResult);
+  });
+
+  it("ID-02: Should return empty array if no transaction updated", async () => {
+    mockReturning.mockResolvedValue([]);
+
+    const result = await updateTransactionStatus(orderId, status);
+
+    expect(result).toEqual([]);
+  });
+
+  it("ID-03: Should throw error when database fails", async () => {
+    mockReturning.mockRejectedValue(new Error("Database error"));
+
+    await expect(updateTransactionStatus(orderId, status))
+      .rejects
+      .toThrow("Database error");
+  });
+});
+
+// #region UTC-04-07
+describe("UTC-04-07: createManyTransactions()", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockInsert.mockReturnValue({
+      values: mockValues,
+    });
+
+    mockValues.mockReturnValue({
+      returning: mockReturning,
+    });
+  });
+
+  it("ID-01: Should insert transactions and return inserted data", async () => {
+    const input = [
+      { orderId: "ORD-001", buyer: "John" },
+      { orderId: "ORD-002", buyer: "Jane" },
+    ];
+
+    const mockResult = [
+      { insertedId: 1, orderId: "ORD-001" },
+      { insertedId: 2, orderId: "ORD-002" },
+    ];
+
+    mockReturning.mockResolvedValue(mockResult);
+
+    const result = await createManyTransactions(input);
+
+    expect(mockInsert).toHaveBeenCalled();
+    expect(mockValues).toHaveBeenCalledWith(input);
+    expect(mockReturning).toHaveBeenCalled();
+
+    expect(result).toEqual(mockResult);
+  });
+
+  it("ID-02: Should return empty array when inserting empty list", async () => {
+    const input: any[] = [];
+
+    mockReturning.mockResolvedValue([]);
+
+    const result = await createManyTransactions(input);
+
+    expect(result).toEqual([]);
+  });
+
+  it("ID-03: Should throw error when database fails", async () => {
+    const input = [{ orderId: "ORD-001" }];
+
+    mockReturning.mockRejectedValue(new Error("Database error"));
+
+    await expect(createManyTransactions(input))
+      .rejects
+      .toThrow("Database error");
+  });
+});
+
+// #region UTC-04-08
+describe("UTC-04-08: createManyTransactionItems()", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockInsert.mockReturnValue({
+      values: mockValues,
+    });
+
+    mockValues.mockReturnValue({
+      returning: mockReturning,
+    });
+  });
+
+  it("ID-01: Should insert transaction items and return inserted rows", async () => {
+    const input = [
+      { transactionId: 1, productId: 10, quantity: 2 },
+      { transactionId: 1, productId: 11, quantity: 1 },
+    ];
+
+    const mockResult = [
+      { id: 100, transactionId: 1, productId: 10, quantity: 2 },
+      { id: 101, transactionId: 1, productId: 11, quantity: 1 },
+    ];
+
+    mockReturning.mockResolvedValue(mockResult);
+
+    const result = await createManyTransactionItems(input);
+
+    expect(mockInsert).toHaveBeenCalled();
+    expect(mockValues).toHaveBeenCalledWith(input);
+    expect(mockReturning).toHaveBeenCalled();
+
+    expect(result).toEqual(mockResult);
+  });
+
+  it("ID-02: Should return empty array when inserting empty list", async () => {
+    const input: any[] = [];
+
+    mockReturning.mockResolvedValue([]);
+
+    const result = await createManyTransactionItems(input);
+
+    expect(result).toEqual([]);
+  });
+
+  it("ID-03: Should throw error when database fails", async () => {
+    const input = [{ transactionId: 1, productId: 10, quantity: 2 }];
+
+    mockReturning.mockRejectedValue(new Error("Database error"));
+
+    await expect(createManyTransactionItems(input))
+      .rejects
+      .toThrow("Database error");
   });
 });
