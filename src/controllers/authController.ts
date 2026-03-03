@@ -58,7 +58,6 @@ export const login = async (
   const { username, password } = req.body;
 
   try {
-    // Required field validation (SRS-71)
     if (!username || !password) {
       throw new BadRequestError({
         message: "Username and password are required!",
