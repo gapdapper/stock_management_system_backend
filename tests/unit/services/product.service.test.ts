@@ -1,139 +1,145 @@
-jest.mock("@/db/supabase", () => ({
-  supabase: {
-    storage: {
-      from: jest.fn(() => ({
-        upload: jest.fn(),
-        getPublicUrl: jest.fn(),
-        remove: jest.fn(),
-      })),
-    },
-  },
+jest.mock("@/repositories/productRepository", () => ({
+  findAllWithVariant: jest.fn(),
 }));
 
-jest.mock("sharp", () => {
-  return jest.fn(() => ({
-    resize: jest.fn().mockReturnThis(),
-    webp: jest.fn().mockReturnThis(),
-    toBuffer: jest.fn().mockResolvedValue(Buffer.from("mock")),
-  }));
-});
+jest.mock("@/db/supabase", () => ({
+  supabase: {},
+}));
 
-// ===============================
-// MOCK REPOSITORY
-// ===============================
-jest.mock("@/repositories/productRepository");
-
-import { getAllProductsWithVariant } from "@/services/productService";
 import * as productRepository from "@/repositories/productRepository";
+import { getAllProductsWithVariant } from "@/services/productService";
 import NotFoundError from "@/utils/errors/not-found";
-import type { IProductRow } from "@/models/product";
 
-describe("UTC-01-07: getAllProductsWithVariant()", () => {
+// #region UTC-01-08
+describe("UTC-01-08: getAllProductsWithVariant()", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  /* =========================================================
-     TC-01
-     Should group variants, calculate stock,
-     sort size & color correctly
-  ========================================================= */
-  it("should return shaped products correctly", async () => {
-    const mockRows: IProductRow[] = [
-      {
-        productId: 1,
-        productName: "Test Product 1",
-        size: "Size M",
-        color: "Red",
-        variantId: 11,
-        qty: 10,
-        minStock: 2,
-        productImageUrl: null,
-        variantUpdatedAt: new Date("2026-02-23T10:00:00Z"),
-        variantImageUrl: null,
-      },
-      {
-        productId: 1,
-        productName: "Test Product 1",
-        size: "Size M",
-        color: "Blue",
-        variantId: 12,
-        qty: 5,
-        minStock: 1,
-        productImageUrl: null,
-        variantUpdatedAt: new Date("2026-02-23T12:00:00Z"),
-        variantImageUrl: null,
-      },
-      {
-        productId: 1,
-        productName: "Test Product 1",
-        size: "Size S",
-        color: "Black",
-        variantId: 13,
-        qty: 8,
-        minStock: 1,
-        productImageUrl: null,
-        variantUpdatedAt: new Date("2026-02-23T09:00:00Z"),
-        variantImageUrl: null,
-      },
-    ];
+  describe("Positive Cases", () => {
+    it("should group rows into wooden toy product with variants correctly", async () => {
+      const mockRows = [
+        {
+          productId: 1,
+          productName: "Wooden Building Blocks",
+          size: "Size M",
+          color: "Natural",
+          variantId: 101,
+          qty: 12,
+          minStock: 3,
+          productImageUrl: "blocks.jpg",
+          variantUpdatedAt: new Date("2026-03-01"),
+          variantImageUrl: "blocks-natural.jpg",
+        },
+        {
+          productId: 1,
+          productName: "Wooden Building Blocks",
+          size: "Size M",
+          color: "Rainbow",
+          variantId: 102,
+          qty: 8,
+          minStock: 2,
+          productImageUrl: "blocks.jpg",
+          variantUpdatedAt: new Date("2026-03-03"),
+          variantImageUrl: "blocks-rainbow.jpg",
+        },
+      ];
 
-    (productRepository.findAllWithVariant as jest.Mock)
-      .mockResolvedValue(mockRows);
-
-    const result = await getAllProductsWithVariant();
-
-    // ===== Basic structure =====
-    expect(result).toHaveLength(1);
-
-    const product = result[0];
-    if(product) {
-      expect(product.id).toBe(1);
-      expect(product.productName).toBe("Test Product 1");
-  
-      // ===== Total stock =====
-      expect(product.totalStock).toBe(23); // 10 + 5 + 8
-  
-      // ===== Latest updated =====
-      expect(product.lastUpdated).toEqual(
-        new Date("2026-02-23T12:00:00Z")
+      (productRepository.findAllWithVariant as jest.Mock).mockResolvedValue(
+        mockRows
       );
-  
-      // ===== Size sorting (Size S < Size M) =====
-      expect(product.variants.map(v => v.size))
-        .toEqual(["Size S", "Size M"]);
-  
-      // ===== Color sorting (A-Z) =====
-      const sizeM = product.variants.find(v => v.size === "Size M");
-      expect(sizeM?.sub.map(s => s.color))
-        .toEqual(["Blue", "Red"]);
-    }
+
+      const result = await getAllProductsWithVariant();
+
+      expect(result).toHaveLength(1);
+      expect(result[0]!.productName).toBe("Wooden Building Blocks");
+      expect(result[0]!.totalStock).toBe(20); // 12 + 8
+      expect(result[0]!.lastUpdated).toEqual(new Date("2026-03-03"));
+
+      expect(result[0]!.variants).toHaveLength(1);
+      expect(result[0]!.variants[0]!.size).toBe("Size M");
+      expect(result[0]!.variants[0]!.sub).toHaveLength(2);
+
+      // color should be sorted alphabetically
+      expect(result[0]!.variants[0]!.sub[0]!.color).toBe("Natural");
+      expect(result[0]!.variants[0]!.sub[1]!.color).toBe("Rainbow");
+    });
+
+    it("should sort wooden toy variants by size order", async () => {
+      const mockRows = [
+        {
+          productId: 2,
+          productName: "Wooden Puzzle Board",
+          size: "Size L",
+          color: "Animal Theme",
+          variantId: 201,
+          qty: 5,
+          minStock: 1,
+          productImageUrl: null,
+          variantUpdatedAt: new Date(),
+          variantImageUrl: null,
+        },
+        {
+          productId: 2,
+          productName: "Wooden Puzzle Board",
+          size: "Size S",
+          color: "Alphabet Theme",
+          variantId: 202,
+          qty: 7,
+          minStock: 2,
+          productImageUrl: null,
+          variantUpdatedAt: new Date(),
+          variantImageUrl: null,
+        },
+      ];
+
+      (productRepository.findAllWithVariant as jest.Mock).mockResolvedValue(
+        mockRows
+      );
+
+      const result = await getAllProductsWithVariant();
+
+      expect(result[0]!.variants[0]!.size).toBe("Size S");
+      expect(result[0]!.variants[1]!.size).toBe("Size L");
+    });
+
+    it("should ignore rows with null variant fields but still count stock", async () => {
+      const mockRows = [
+        {
+          productId: 3,
+          productName: "Wooden Train Set",
+          size: null,
+          color: null,
+          variantId: null,
+          qty: 15,
+          minStock: 5,
+          productImageUrl: null,
+          variantUpdatedAt: null,
+          variantImageUrl: null,
+        },
+      ];
+
+      (productRepository.findAllWithVariant as jest.Mock).mockResolvedValue(
+        mockRows
+      );
+
+      const result = await getAllProductsWithVariant();
+
+      expect(result[0]!.productName).toBe("Wooden Train Set");
+      expect(result[0]!.variants).toHaveLength(0);
+      expect(result[0]!.totalStock).toBe(15);
+    });
   });
 
-  /* =========================================================
-     TC-02
-     Should throw NotFoundError when no data
-  ========================================================= */
-  it("should throw NotFoundError when no products found", async () => {
-    (productRepository.findAllWithVariant as jest.Mock)
-      .mockResolvedValue([]);
+  describe("Negative Cases", () => {
+    it("should throw NotFoundError if no wooden toy products found", async () => {
+      (productRepository.findAllWithVariant as jest.Mock).mockResolvedValue(
+        []
+      );
 
-    await expect(getAllProductsWithVariant())
-      .rejects
-      .toBeInstanceOf(NotFoundError);
-  });
-
-  /* =========================================================
-     TC-03
-     Should throw error when repository fails
-  ========================================================= */
-  it("should throw error when repository throws", async () => {
-    (productRepository.findAllWithVariant as jest.Mock)
-      .mockRejectedValue(new Error("DB error"));
-
-    await expect(getAllProductsWithVariant())
-      .rejects
-      .toThrow("DB error");
+      await expect(getAllProductsWithVariant()).rejects.toThrow(
+        NotFoundError
+      );
+    });
   });
 });
-

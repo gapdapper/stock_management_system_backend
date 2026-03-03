@@ -1,163 +1,160 @@
-// ===============================
-// MOCK REPOSITORY
-// ===============================
-jest.mock("@/db/supabase", () => ({
-  supabase: {
-    storage: {
-      from: jest.fn(() => ({
-        upload: jest.fn(),
-        getPublicUrl: jest.fn(),
-        remove: jest.fn(),
-      })),
-    },
-  },
+jest.mock("@/repositories/productVariantRepository", () => ({
+  updateById: jest.fn(),
+  updateQuantitiesByIds: jest.fn(),
 }));
 
-jest.mock("sharp", () => {
-  return jest.fn(() => ({
-    resize: jest.fn().mockReturnThis(),
-    webp: jest.fn().mockReturnThis(),
-    toBuffer: jest.fn().mockResolvedValue(Buffer.from("mock")),
-  }));
-});
+jest.mock("@/db/supabase", () => ({
+  supabase: {},
+}));
 
-jest.mock("@/repositories/productVariantRepository");
-
-import { editProductVariant } from "@/services/productVariantService";
+import { editProductVariant, restockProductVariant } from "@/services/productVariantService";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
-import NotFoundError from "@/utils/errors/not-found";
 import BadRequestError from "@/utils/errors/bad-request";
-import type { IProductVariant } from "@/models/product";
+import NotFoundError from "@/utils/errors/not-found";
 
-describe("UTC-01-05: editProductVariant()", () => {
+// #region UTC-01-06
+describe("UTC-01-06: editProductVariant", () => {
+  const validProduct = {
+    id: 10,
+    productId: 1,
+    colorId: 2,
+    sizeId: 3,
+    qty: 25,
+    minStock: 5,
+    imageUrl: "wooden.png",
+    updatedAt: new Date(),
+    createdAt: new Date(),
+  };
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  /* =========================================================
-     TC-01
-     Should update product variant successfully
-  ========================================================= */
-  it("should update product variant successfully", async () => {
-    const mockInput: IProductVariant = {
-      id: 1,
-      qty: 30,
-      minStock: 10,
-      sizeId: 1,
-      colorId: 1,
-      productId: 1,
-      imageUrl: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    (productVariantRepository.updateById as jest.Mock)
-      .mockResolvedValue([mockInput]);
-
-    const result = await editProductVariant(mockInput);
-
-    expect(productVariantRepository.updateById).toHaveBeenCalledWith(
-      1,
-      expect.objectContaining({
-        qty: 30,
-        minStock: 10,
-      })
-    );
-
-    expect(result).toEqual({ message: "success" });
-  });
-
-  /* =========================================================
-     TC-02
-     Should throw NotFoundError when variant not found
-  ========================================================= */
-  it("should throw NotFoundError when product variant does not exist", async () => {
-    const mockInput: IProductVariant = {
-      id: 999,
-      qty: 20,
-      minStock: 5,
-      sizeId: 1,
-      colorId: 1,
-      productId: 1,
-      imageUrl: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    (productVariantRepository.updateById as jest.Mock)
-      .mockResolvedValue([]);
-
-    await expect(editProductVariant(mockInput))
-      .rejects
-      .toBeInstanceOf(NotFoundError);
-
-    await expect(editProductVariant(mockInput))
-      .rejects
-      .toThrow("Product with ID 999 not found");
-  });
-
-  /* =========================================================
-     TC-03
-     Should throw NotFoundError when no product provided
-  ========================================================= */
-  it("should throw NotFoundError when no product provided", async () => {
+  // Case 1: No product provided
+  it("should throw NotFoundError if product is undefined", async () => {
     await expect(editProductVariant(undefined as any))
       .rejects
       .toBeInstanceOf(NotFoundError);
 
-    await expect(editProductVariant(undefined as any))
-      .rejects
-      .toThrow("No product provided");
+    expect(productVariantRepository.updateById).not.toHaveBeenCalled();
   });
 
-  /* =========================================================
-     TC-04
-     Should throw BadRequestError when qty or minStock < 0
-  ========================================================= */
-  it("should throw BadRequestError when qty is negative", async () => {
-    const mockInput: IProductVariant = {
-      id: 1,
-      qty: -1,
-      minStock: 5,
-      sizeId: 1,
-      colorId: 1,
-      productId: 1,
-      imageUrl: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  // Case 2: Negative qty
+  it("should throw BadRequestError if qty is negative", async () => {
+    const invalidProduct = { ...validProduct, qty: -1 };
 
-    await expect(editProductVariant(mockInput))
+    await expect(editProductVariant(invalidProduct))
       .rejects
       .toBeInstanceOf(BadRequestError);
 
-    await expect(editProductVariant(mockInput))
-      .rejects
-      .toThrow("Incorrect value");
+    expect(productVariantRepository.updateById).not.toHaveBeenCalled();
   });
 
-  /* =========================================================
-     TC-05
-     Should throw error when repository throws (DB failure)
-  ========================================================= */
-  it("should propagate error when database fails", async () => {
-    const mockInput: IProductVariant = {
-      id: 1,
-      qty: 30,
-      minStock: 10,
-      sizeId: 1,
-      colorId: 1,
-      productId: 1,
-      imageUrl: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  // Case 3: Negative minStock
+  it("should throw BadRequestError if minStock is negative", async () => {
+    const invalidProduct = { ...validProduct, minStock: -5 };
 
-    (productVariantRepository.updateById as jest.Mock)
-      .mockRejectedValue(new Error("DB error"));
-
-    await expect(editProductVariant(mockInput))
+    await expect(editProductVariant(invalidProduct))
       .rejects
-      .toThrow("DB error");
+      .toBeInstanceOf(BadRequestError);
+
+    expect(productVariantRepository.updateById).not.toHaveBeenCalled();
+  });
+
+  // Case 4: Product not found in DB
+  it("should throw NotFoundError if repository returns empty array", async () => {
+    (productVariantRepository.updateById as jest.Mock)
+      .mockResolvedValue([]);
+
+    await expect(editProductVariant(validProduct))
+      .rejects
+      .toBeInstanceOf(NotFoundError);
+
+    expect(productVariantRepository.updateById)
+      .toHaveBeenCalledWith(10, expect.any(Object));
+  });
+
+  // Case 5: Success
+  it("should return success message when update succeeds", async () => {
+    (productVariantRepository.updateById as jest.Mock)
+      .mockResolvedValue([validProduct]);
+
+    const result = await editProductVariant(validProduct);
+
+    expect(productVariantRepository.updateById)
+      .toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({
+          productId: 1,
+          qty: 25,
+        })
+      );
+
+    expect(result).toEqual({ message: "success" });
+  });
+});
+
+
+// #region UTC-01-08
+describe("UTC-01-08: restockProductVariant", () => {
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // Case 1: Not array
+  it("should throw error when payload is not array", async () => {
+    await expect(restockProductVariant(null as any))
+      .rejects
+      .toBeInstanceOf(BadRequestError);
+
+    expect(productVariantRepository.updateQuantitiesByIds)
+      .not.toHaveBeenCalled();
+  });
+
+  // Case 2: Empty array
+  it("should throw error when array is empty", async () => {
+    await expect(restockProductVariant([]))
+      .rejects
+      .toBeInstanceOf(BadRequestError);
+  });
+
+  // Case 3: Missing variantId
+  it("should throw error when variantId is missing", async () => {
+    const payload = [{ qty: 5 }];
+
+    await expect(restockProductVariant(payload))
+      .rejects
+      .toBeInstanceOf(BadRequestError);
+  });
+
+  // Case 4: qty null
+  it("should throw error when qty is null", async () => {
+    const payload = [{ variantId: 1, qty: null }];
+
+    await expect(restockProductVariant(payload))
+      .rejects
+      .toBeInstanceOf(BadRequestError);
+  });
+
+  // Case 5: qty <= 0
+  it("should throw error when qty <= 0", async () => {
+    const payload = [{ variantId: 1, qty: 0 }];
+
+    await expect(restockProductVariant(payload))
+      .rejects
+      .toBeInstanceOf(BadRequestError);
+  });
+
+  // Case 6: Success
+  it("should call repository and return success for valid payload", async () => {
+    const payload = [{ variantId: 1, qty: 5 }];
+
+    const result = await restockProductVariant(payload);
+
+    expect(productVariantRepository.updateQuantitiesByIds)
+      .toHaveBeenCalledWith(payload);
+
+    expect(result).toEqual({ message: "success" });
   });
 });

@@ -34,7 +34,6 @@ export const editProductVariant = async (product: IProductVariant) => {
 };
 
 export const restockProductVariant = async (productVariants: any) => {
-  console.log(productVariants)
   if (!Array.isArray(productVariants) || productVariants.length === 0) {
     throw new BadRequestError({
       code: 400,
