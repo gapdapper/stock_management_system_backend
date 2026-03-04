@@ -185,20 +185,19 @@ export const deleteTransactionItem = async (
 export const processImportedTransactionFiles = async (
   files: Express.Multer.File[]
 ) => {
-  if(!files){
-        throw new BadRequestError({
-        code: 400,
-        message: "transaction file is required",
-        logging: true,
-      });
-  }
-
-
-  let transactionBatch: ITransaction[] = [];
-  let transactionItemBatch: ITransactionItem[] = [];
-  let itemQuantity: { productVariantId: number; quantity: number }[] = [];
-
   try {
+    if(!files || !Array.isArray(files) || files.length === 0){
+          throw new BadRequestError({
+          code: 400,
+          message: "transaction file is required",
+          logging: true,
+        });
+    }
+  
+  
+    let transactionBatch: ITransaction[] = [];
+    let transactionItemBatch: ITransactionItem[] = [];
+    let itemQuantity: { productVariantId: number; quantity: number }[] = [];
     // Placeholder for processing logic
     for (const file of files) {
       const workbook = XLSX.read(file.buffer, { type: "buffer", raw: true });

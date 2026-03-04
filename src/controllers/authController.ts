@@ -89,7 +89,6 @@ export const logout = async (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log("Cookies before clearing:", req.cookies);
   const { refreshToken } = req.cookies;
 
   if (!refreshToken) {
