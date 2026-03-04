@@ -5,6 +5,20 @@ const mockSet = jest.fn();
 const mockWhere = jest.fn();
 const mockReturning = jest.fn();
 
+// ----- drizzle chain -----
+mockUpdate.mockReturnValue({
+  set: mockSet,
+});
+
+mockSet.mockReturnValue({
+  where: mockWhere,
+});
+
+mockWhere.mockReturnValue({
+  returning: mockReturning,
+});
+
+// ----- db mock -----
 jest.mock("@/db/connect", () => ({
   __esModule: true,
   default: {
@@ -13,30 +27,46 @@ jest.mock("@/db/connect", () => ({
         findFirst: mockFindFirst,
       },
     },
-    transaction: mockTransaction,
     update: mockUpdate,
+    transaction: mockTransaction,
   },
 }));
 
+// ----- drizzle mock -----
 jest.mock("drizzle-orm", () => ({
   eq: jest.fn(() => "mocked-eq"),
-  sql: jest.fn((strings: TemplateStringsArray, ...values: any[]) => {
-    return "mocked-sql";
-  }),
+  sql: jest.fn(() => "mocked-sql"),
 }));
 
+// ----- schema mock -----
 jest.mock("@/db/schema", () => ({
   productVariant: {
     id: "id",
   },
 }));
-
+import * as schema from "@/db/schema";
+import type { IProductVariant } from "@/models/product";
 import {
   findById,
   updateQuantitiesByIds,
   updateById,
   updateQuantityById
 } from "@/repositories/productVariantRepository";
+
+const createMockVariant = (
+  override?: Partial<IProductVariant>,
+): IProductVariant => ({
+  id: 1,
+  productId: 10,
+  colorId: null,
+  sizeId: null,
+  qty: 100,
+  minStock: 5,
+  imageUrl: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  ...override,
+});
 
 
 describe("productVariantRepository", () => {
@@ -139,7 +169,7 @@ describe("productVariantRepository", () => {
 });
 
 
-// #region UTC-01-14
+// #region UTC-01-10
 describe("UTC-01-14: updateById()", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -279,3 +309,4 @@ describe("UTC-04-09: updateQuantityById()", () => {
       .toThrow("Database error");
   });
 });
+
