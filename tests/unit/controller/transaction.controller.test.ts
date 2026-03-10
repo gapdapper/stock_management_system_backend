@@ -60,7 +60,24 @@ describe("UTC-03-01: getTransaction()", () => {
     expect(mockNext).not.toHaveBeenCalled();
   });
 
-  it("ID-02: should call next(error) when service throws error", async () => {
+  it("ID-02: should return 200 and empty array when no transactions exist", async () => {
+  (transactionService.getTransactions as jest.Mock).mockResolvedValue([]);
+
+  await getTransaction(
+    mockReq as Request,
+    mockRes as Response,
+    mockNext
+  );
+
+  expect(transactionService.getTransactions).toHaveBeenCalledTimes(1);
+  expect(mockRes.status).toHaveBeenCalledWith(200);
+  expect(mockRes.json).toHaveBeenCalledWith({
+    transactions: [],
+  });
+  expect(mockNext).not.toHaveBeenCalled();
+});
+
+  it("ID-03: should call next(error) when service throws error", async () => {
     const mockError = new Error("Database failed");
 
     (transactionService.getTransactions as jest.Mock).mockRejectedValue(mockError);

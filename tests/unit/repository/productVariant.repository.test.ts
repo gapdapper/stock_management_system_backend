@@ -170,7 +170,7 @@ describe("productVariantRepository", () => {
 
 
 // #region UTC-01-10
-describe("UTC-01-14: updateById()", () => {
+describe("UTC-01-10: updateById()", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 

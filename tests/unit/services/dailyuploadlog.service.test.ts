@@ -5,7 +5,8 @@ jest.mock("@/repositories/dailyUploadLogRepository", () => ({
   findUploadLog: jest.fn(),
 }));
 
-describe("UTC-SVC-UPLOADLOG-01: getUploadLog()", () => {
+// #region UTC-04-04
+describe("UTC-04-04: getUploadLog()", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

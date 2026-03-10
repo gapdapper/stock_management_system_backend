@@ -135,7 +135,7 @@ describe("UTC-02-06: sumUnitsSold()", () => {
 });
 
 // #region UTC-02-07
-describe("UTC-TRXITEM-02: topSoldProducts()", () => {
+describe("UTC-02-07: topSoldProducts()", () => {
   const start = new Date("2025-01-01");
   const end = new Date("2025-02-01");
 
@@ -205,7 +205,7 @@ describe("UTC-TRXITEM-02: topSoldProducts()", () => {
 });
 
 // #region UTC-02-08
-describe("UTC-TRX-02: salesByPlatform()", () => {
+describe("UTC-02-08: salesByPlatform()", () => {
   const start = new Date("2025-01-01");
   const end = new Date("2025-02-01");
 
@@ -267,7 +267,7 @@ describe("UTC-TRX-02: salesByPlatform()", () => {
 });
 
 // #region UTC-02-09
-describe("UTC-TRX-03: getOrderStatusBreakdown()", () => {
+describe("UTC-02-09: getOrderStatusBreakdown()", () => {
   const start = new Date("2025-01-01");
   const end = new Date("2025-02-01");
 
