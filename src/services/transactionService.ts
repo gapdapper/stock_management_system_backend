@@ -252,12 +252,12 @@ export const processImportedTransactionFiles = async (
 
         const productId =
           productIdFinder(normalizedResult["productName"], provider) || 0;
-        const { colorId, sizeId } = variantIdFinder(
-          productId,
-          normalizedResult["productName"],
-          normalizedResult["variation"],
-          provider
-        );
+          const { colorId, sizeId } = variantIdFinder(
+            productId,
+            normalizedResult["productName"],
+            normalizedResult["variation"],
+            provider
+          );
         const productVariant =
           await productVariantRepository.findByProductIdAndAttributesId(
             productId,
@@ -280,7 +280,7 @@ export const processImportedTransactionFiles = async (
           shippingPostalCode: normalizedResult["postalCode"],
           platformId: platformMapper(provider).id,
           status:
-            normalizedResult["cancelReason"] === ""
+            normalizedResult["cancelReason"] === "" || !normalizedResult["cancelReason"]
               ? statusMapper(normalizedResult["status"], provider)
               : "returned",
           note: normalizedResult["cancelReason"] || "N/A",
@@ -306,8 +306,6 @@ export const processImportedTransactionFiles = async (
           await transactionRepository.findTransactionByOrderId(
             transaction.orderId
           );
-
-          if (existingTransaction.length == 0)  console.log('existed',transaction.orderId)
        
         // new transaction
         if (!existingTransaction || existingTransaction.length == 0) {
