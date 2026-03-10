@@ -94,6 +94,73 @@ describe("UTC-01-06: editProductVariant", () => {
   });
 });
 
+// #region UTC-01-07
+describe("UTC-01-07: restockProductVariant", () => {
+  const validPayload = [
+    {
+      variantId: 1,
+      qty: 5,
+    },
+  ];
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("TC1: Throw error when payload is not an array", async () => {
+    await expect(restockProductVariant(null as any)).rejects.toThrow(
+      new BadRequestError({
+        code: 400,
+        message: "Product variant ID is required",
+        logging: false,
+      })
+    );
+  });
+
+  it("TC2: Throw error when array is empty", async () => {
+    await expect(restockProductVariant([])).rejects.toThrow(
+      "Product variant ID is required"
+    );
+  });
+
+  it("TC3: Throw error when variantId is missing", async () => {
+    const payload = [{ qty: 5 }];
+
+    await expect(restockProductVariant(payload as any)).rejects.toThrow(
+      "Product variant ID is required"
+    );
+  });
+
+  it("TC4: Throw error when qty is null", async () => {
+    const payload = [{ variantId: 1, qty: null }];
+
+    await expect(restockProductVariant(payload as any)).rejects.toThrow(
+      "Quantity must be greater than 0"
+    );
+  });
+
+  it("TC5: Throw error when qty <= 0", async () => {
+    const payload = [{ variantId: 1, qty: 0 }];
+
+    await expect(restockProductVariant(payload as any)).rejects.toThrow(
+      "Quantity must be greater than 0"
+    );
+  });
+
+  it("TC6: Success when valid payload provided", async () => {
+    const repoSpy = jest
+      .spyOn(productVariantRepository, "updateQuantitiesByIds")
+      .mockResolvedValue("BULK_RESTOCK_SUCCESS");
+
+    const result = await restockProductVariant(validPayload);
+
+    expect(repoSpy).toHaveBeenCalledWith(validPayload);
+
+    expect(result).toEqual({
+      message: "success",
+    });
+  });
+});
 
 // #region UTC-01-08
 describe("UTC-01-08: restockProductVariant", () => {
