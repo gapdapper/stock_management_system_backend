@@ -12,9 +12,11 @@ import productVariantRouter from '@/routes/productvariantRoutes'
 import dailyUploadLogRouter from '@/routes/dailyUploadLogRoutes';
 import dashboardRouter from '@/routes/dashboardRoutes';
 import webhookRouter from '@/routes/webhookRoutes';
+import healthRouter from '@/routes/healthRoutes';
 import cookieParser from 'cookie-parser';
 import {startDailyUploadNotifyJob} from '@/cron/dailyUploadNotify';
 import {startLowStockNotifyJob} from '@/cron/lowStockNotify';
+import { startWarmUp } from './utils/warmup';
 
 const app = express();
 const PORT = 3000;
@@ -31,6 +33,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(pinoHttp());
 
+
+
 // Start the daily upload notification job
 startDailyUploadNotifyJob();
 startLowStockNotifyJob();
@@ -45,10 +49,13 @@ app.use('/api/v1/transactions', transactionRouter);
 app.use('/api/v1/dailyUploadLog', dailyUploadLogRouter);
 app.use('/api/v1/dashboard', dashboardRouter);
 app.use('/api/v1/webhooks', webhookRouter);
+app.use('/api/v1/health', healthRouter);
 
 // Error Handling Middleware
 app.use(errorHandler);
 
+// Start warmup job
+startWarmUp();
 
 app.listen(PORT, (error) =>{
     if(!error)
