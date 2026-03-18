@@ -14,6 +14,7 @@ import dashboardRouter from '@/routes/dashboardRoutes';
 import webhookRouter from '@/routes/webhookRoutes';
 import cookieParser from 'cookie-parser';
 import {startDailyUploadNotifyJob} from '@/cron/dailyUploadNotify';
+import {startLowStockNotifyJob} from '@/cron/lowStockNotify';
 
 const app = express();
 const PORT = 3000;
@@ -32,6 +33,7 @@ app.use(pinoHttp());
 
 // Start the daily upload notification job
 startDailyUploadNotifyJob();
+startLowStockNotifyJob();
 
 // Routes
 app.use('/api/v1/auth', authRouter);
