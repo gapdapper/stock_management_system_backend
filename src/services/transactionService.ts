@@ -388,6 +388,7 @@ export const processImportedTransactionFiles = async (
         iq.quantity
       );
     }
+    return transactionBatch;
   } catch (error) {
     console.error("Error processing uploaded transaction files:", error);
     throw error;
