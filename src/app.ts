@@ -14,8 +14,8 @@ import dashboardRouter from '@/routes/dashboardRoutes';
 import webhookRouter from '@/routes/webhookRoutes';
 import healthRouter from '@/routes/healthRoutes';
 import cookieParser from 'cookie-parser';
-import {startDailyUploadNotifyJob} from '@/cron/dailyUploadNotify';
-import {startLowStockNotifyJob} from '@/cron/lowStockNotify';
+import {startDailyUploadNotifyJob} from '@/jobs/dailyUploadNotify';
+import {startLowStockNotifyJob} from '@/jobs/lowStockNotify';
 import { startWarmUp } from './utils/warmup';
 
 const app = express();

@@ -4,16 +4,16 @@
     // File Layout
     "rootDir": "./src",
     "outDir": "./dist",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-			"@/*": ["*"]
+			"@/*": ["src/*"]
     },
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "target": "esnext",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2021",
     "types": ["jest"],
     // For nodejs:
     // "lib": ["esnext"],
@@ -40,12 +40,11 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
     "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src"],
   "exclude": ["drizzle.config.ts", "node_modules", "tests", "**/*.test.ts"],
+
 }

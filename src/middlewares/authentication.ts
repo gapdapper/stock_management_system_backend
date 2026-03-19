@@ -1,6 +1,6 @@
 import UnauthorizedError from "@/utils/errors/unauthorized";
 import type { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken"
+import * as jwt from "jsonwebtoken"
 
 export const authenticateUser = (
   req: Request,
