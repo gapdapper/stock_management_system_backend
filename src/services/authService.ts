@@ -1,7 +1,8 @@
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 import * as authRepository from "@/repositories/authRepository";
 import BadRequestError from "@/utils/errors/bad-request";
-import jwt, { type SignOptions } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+import type { SignOptions } from "jsonwebtoken";
 import UnauthorizedError from "@/utils/errors/unauthorized";
 import * as crypto from "crypto";
 

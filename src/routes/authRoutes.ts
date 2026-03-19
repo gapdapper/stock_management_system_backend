@@ -1,4 +1,4 @@
-import express from 'express';
+import * as express from 'express';
 import { login, register, logout, refreshToken, getProfile, checkAvailableUsernames } from '@/controllers/authController';
 import { authenticateUser } from '@/middlewares/authentication';
 import { authorizeUser } from '@/middlewares/role-authorization';
@@ -10,9 +10,9 @@ router.post('/login', login);
 router.post('/logout', logout);
 router.post('/refresh', refreshToken)
 router.get('/me', authenticateUser, getProfile);
-router.get('/check-username', checkAvailableUsernames);
-router.post('/test', authenticateUser, (req, res) => {
-    res.send('Test route is working!');
-});
+router.get('/check-username', authenticateUser, checkAvailableUsernames);
+// router.post('/test', authenticateUser, (req, res) => {
+//     res.send('Test route is working!');
+// });
 
 export default router;

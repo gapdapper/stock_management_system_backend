@@ -2,12 +2,14 @@ import "@/config/env";
 import db from "../db/connect";
 import { reset } from "drizzle-seed";
 import * as schema from "../db/schema";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 
-const adminPassword = await bcrypt.hash("admin123", 10);
 
 async function main() {
   console.log("Running TEST seeder...");
+
+  const adminPassword = await bcrypt.hash("admin123", 10);
+
 
   await reset(db, schema);
 

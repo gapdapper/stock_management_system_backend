@@ -2,9 +2,8 @@ import "@/config/env";
 import db from "../db/connect";
 import { reset } from "drizzle-seed";
 import * as schema from "../db/schema";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 
-const adminPassword = await bcrypt.hash("admin123", 10);
 
 const productNames = [
   "Jenga / Genga",
@@ -227,6 +226,9 @@ async function resetIdentitySequences() {
 
 async function main() {
   console.log("Seeding database...");
+
+  const adminPassword = await bcrypt.hash("admin123", 10);
+
 
   await resetIdentitySequences();
   await reset(db, schema);

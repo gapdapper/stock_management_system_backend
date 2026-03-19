@@ -1,4 +1,4 @@
-import express from "express";
+import *as express from "express";
 import multer from 'multer';
 import {
   addTransaction,
@@ -12,23 +12,24 @@ import {
   deleteTransactionItem,
   importTransactions,
 } from "@/controllers/transactionController";
+import { authenticateUser } from "@/middlewares/authentication";
 
 const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Transaction Routes
-router.get("/", getTransaction);
-router.get("/:id", getTransactionById);
-router.post("/", addTransaction);
-router.patch("/:id", editTransaction);
-router.delete("/:id", deleteTransaction);
+router.get("/", authenticateUser, getTransaction);
+router.get("/:id", authenticateUser, getTransactionById);
+router.post("/", authenticateUser, addTransaction);
+router.patch("/:id", authenticateUser, editTransaction);
+router.delete("/:id", authenticateUser, deleteTransaction);
 
 // Transaction Item Routes
-router.get("/:transactionId/items", getTransactionItemsById);
-router.post("/:transactionId/items", addTransactionItem);
-router.patch("/:transactionId/items/:id", editTransactionItem);
-router.delete("/:transactionId/items/:id", deleteTransactionItem);
+router.get("/:transactionId/items", authenticateUser, getTransactionItemsById);
+router.post("/:transactionId/items", authenticateUser, addTransactionItem);
+router.patch("/:transactionId/items/:id", authenticateUser, editTransactionItem);
+router.delete("/:transactionId/items/:id", authenticateUser, deleteTransactionItem);
 
 // Route for importing transactions via spreadsheet
 router.post("/import", upload.array('file', 12), importTransactions)
