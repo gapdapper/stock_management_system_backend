@@ -2,8 +2,9 @@ import "@/config/env";
 import db from "../db/connect";
 import { reset } from "drizzle-seed";
 import * as schema from "../db/schema";
-import { ShopeeProductPattern } from "@/utils/sheets/aliases/shopee-pattern";
-import { id } from "zod/locales";
+import bcrypt from "bcryptjs";
+
+const adminPassword = await bcrypt.hash("admin123", 10);
 
 const productNames = [
   "Jenga / Genga",
@@ -268,6 +269,19 @@ async function main() {
   await db.insert(schema.dailyUploadLog).values(
     { uploadAt: new Date()}
   );
+
+  await db.insert(schema.users).values([
+  {
+      username: "admin",
+      password: adminPassword,
+      role: "admin",
+  },
+  {
+      username: "user",
+      password: adminPassword,
+      role: "user",
+  },
+  ]);
 
   await resetIdentitySequences();
 

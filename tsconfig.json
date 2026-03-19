@@ -14,7 +14,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "target": "esnext",
-    "types": [],
+    "types": ["jest"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -46,5 +46,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "exclude": ["drizzle.config.ts"],
+  "include": ["src"],
+  "exclude": ["drizzle.config.ts", "node_modules", "tests", "**/*.test.ts"],
 }

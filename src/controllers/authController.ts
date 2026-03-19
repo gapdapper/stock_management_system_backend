@@ -58,7 +58,6 @@ export const login = async (
   const { username, password } = req.body;
 
   try {
-    // Required field validation (SRS-71)
     if (!username || !password) {
       throw new BadRequestError({
         message: "Username and password are required!",
@@ -90,7 +89,6 @@ export const logout = async (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log("Cookies before clearing:", req.cookies);
   const { refreshToken } = req.cookies;
 
   if (!refreshToken) {

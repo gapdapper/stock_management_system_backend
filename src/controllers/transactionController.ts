@@ -132,8 +132,8 @@ export const importTransactions = async (req: Request, res: Response, next: Next
         return res.status(400).json({ message: 'No files uploaded' });
     }
     try {
-        await transactionService.processImportedTransactionFiles(files);
-        res.status(200).json({ message: 'Files processed successfully' });
+        const result = await transactionService.processImportedTransactionFiles(files);
+        res.status(200).json({ result: result });
     } catch (error) {
         next(error);
     }

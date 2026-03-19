@@ -2,7 +2,7 @@ import db from "@/db/connect";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export const getUploadLog = async () => {
+export const findUploadLog = async () => {
     const uploadLog = await db.query.dailyUploadLog.findFirst();
     return uploadLog;
 }

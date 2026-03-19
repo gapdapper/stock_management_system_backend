@@ -185,20 +185,19 @@ export const deleteTransactionItem = async (
 export const processImportedTransactionFiles = async (
   files: Express.Multer.File[]
 ) => {
-  if(!files){
-        throw new BadRequestError({
-        code: 400,
-        message: "transaction file is required",
-        logging: true,
-      });
-  }
-
-
-  let transactionBatch: ITransaction[] = [];
-  let transactionItemBatch: ITransactionItem[] = [];
-  let itemQuantity: { productVariantId: number; quantity: number }[] = [];
-
   try {
+    if(!files || !Array.isArray(files) || files.length === 0){
+          throw new BadRequestError({
+          code: 400,
+          message: "transaction file is required",
+          logging: true,
+        });
+    }
+  
+  
+    let transactionBatch: ITransaction[] = [];
+    let transactionItemBatch: ITransactionItem[] = [];
+    let itemQuantity: { productVariantId: number; quantity: number }[] = [];
     // Placeholder for processing logic
     for (const file of files) {
       const workbook = XLSX.read(file.buffer, { type: "buffer", raw: true });
@@ -253,12 +252,12 @@ export const processImportedTransactionFiles = async (
 
         const productId =
           productIdFinder(normalizedResult["productName"], provider) || 0;
-        const { colorId, sizeId } = variantIdFinder(
-          productId,
-          normalizedResult["productName"],
-          normalizedResult["variation"],
-          provider
-        );
+          const { colorId, sizeId } = variantIdFinder(
+            productId,
+            normalizedResult["productName"],
+            normalizedResult["variation"],
+            provider
+          );
         const productVariant =
           await productVariantRepository.findByProductIdAndAttributesId(
             productId,
@@ -281,7 +280,7 @@ export const processImportedTransactionFiles = async (
           shippingPostalCode: normalizedResult["postalCode"],
           platformId: platformMapper(provider).id,
           status:
-            normalizedResult["cancelReason"] === ""
+            normalizedResult["cancelReason"] === "" || !normalizedResult["cancelReason"]
               ? statusMapper(normalizedResult["status"], provider)
               : "returned",
           note: normalizedResult["cancelReason"] || "N/A",
@@ -307,8 +306,6 @@ export const processImportedTransactionFiles = async (
           await transactionRepository.findTransactionByOrderId(
             transaction.orderId
           );
-
-          if (existingTransaction.length == 0)  console.log('existed',transaction.orderId)
        
         // new transaction
         if (!existingTransaction || existingTransaction.length == 0) {
@@ -391,6 +388,7 @@ export const processImportedTransactionFiles = async (
         iq.quantity
       );
     }
+    return transactionBatch;
   } catch (error) {
     console.error("Error processing uploaded transaction files:", error);
     throw error;

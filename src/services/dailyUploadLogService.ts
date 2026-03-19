@@ -11,7 +11,7 @@ const URL = "https://api.line.me/v2/bot/message/push";
 export const checkDailyUploadLog = async (date: Date) => {
     date.setHours(0, 0, 0, 0);
 
-    const lastUploadLog = await dailyUploadLogRepository.getUploadLog();
+    const lastUploadLog = await dailyUploadLogRepository.findUploadLog();
     if (lastUploadLog && lastUploadLog.uploadAt >= date) {
         console.log("LINE notification was skipped: upload already done today.");
     } else {
@@ -20,7 +20,7 @@ export const checkDailyUploadLog = async (date: Date) => {
             messages: [
                 {
                     type: "text",
-                    text: "วันนี้ยังไม่พบการอัปโหลดไฟล์เข้าระบบ กรุณาตรวจสอบและอัปโหลดให้เรียบร้อยค่ะ/ครับ 🙏",
+                    text: "วันนี้ยังไม่พบการอัปโหลดไฟล์เข้าระบบ กรุณาตรวจสอบและอัปโหลดให้เรียบร้อยครับ 🙏",
                 },
             ],
         },
@@ -29,6 +29,6 @@ export const checkDailyUploadLog = async (date: Date) => {
 }
 
 export const getUploadLog = async () => {
-    const uploadLog = await dailyUploadLogRepository.getUploadLog();
+    const uploadLog = await dailyUploadLogRepository.findUploadLog();
     return uploadLog;
 }

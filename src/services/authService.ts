@@ -3,7 +3,7 @@ import * as authRepository from "@/repositories/authRepository";
 import BadRequestError from "@/utils/errors/bad-request";
 import jwt, { type SignOptions } from "jsonwebtoken";
 import UnauthorizedError from "@/utils/errors/unauthorized";
-import crypto from "crypto";
+import * as crypto from "crypto";
 
 export const registerUser = async (user: any): Promise<{ id: number }> => {
   const usernameRegex = /^[a-zA-Z0-9]{4,20}$/;
@@ -107,14 +107,7 @@ export const logoutUser = async (refreshToken: string): Promise<void> => {
     .update(refreshToken)
     .digest("hex");
 
-  const result = authRepository.revokeRefreshTokenByHashed(tokenHash);
-  if(!result) {
-    throw new UnauthorizedError({
-      code: 401,
-      message: "Invalid refresh token",
-      logging: true,
-    });
-  }
+  await authRepository.revokeRefreshTokenByHashed(tokenHash);
 };
 
 export const refreshToken = async (

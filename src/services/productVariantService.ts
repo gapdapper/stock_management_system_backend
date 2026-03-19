@@ -4,6 +4,14 @@ import NotFoundError from "@/utils/errors/not-found";
 import { supabase } from "@/db/supabase";
 import sharp from "sharp";
 import BadRequestError from "@/utils/errors/bad-request";
+import axios from "axios";
+
+const HEADERS = {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${process.env.WEBHOOK_TOKEN}`,
+};
+
+const URL = "https://api.line.me/v2/bot/message/push";
 
 export const editProductVariant = async (product: IProductVariant) => {
   if (!product) {
@@ -34,7 +42,6 @@ export const editProductVariant = async (product: IProductVariant) => {
 };
 
 export const restockProductVariant = async (productVariants: any) => {
-  console.log(productVariants)
   if (!Array.isArray(productVariants) || productVariants.length === 0) {
     throw new BadRequestError({
       code: 400,
@@ -122,5 +129,41 @@ export const uploadProductImage = async (
   } catch (err) {
     console.error("uploadProductImage failed:", err);
     throw new Error("Failed to upload product image");
+  }
+};
+
+export const checkLowStockProduct = async () => {
+  try {
+    const lowStockProduct =
+      await productVariantRepository.findLowStockProductVariant();
+    if (lowStockProduct.length === 0) return;
+
+    const message = [
+      "🔴 สินค้าใกล้หมดสต็อก\n",
+      ...lowStockProduct.map((item) => {
+        const color = item.colorName ?? "-";
+        const size = item.sizeName ?? "-";
+
+        return `- ${item.productName} (${color} / ${size})
+  เหลือ: ${item.qty} | ขั้นต่ำ: ${item.minStock}`;
+      }),
+    ].join("\n");
+
+    await axios.post(
+      URL,
+      {
+        to: "Cd06404215eac49328d5c1d4029193a7c",
+        messages: [
+          {
+            type: "text",
+            text: message,
+          },
+        ],
+      },
+      { headers: HEADERS },
+    );
+  } catch (err) {
+    console.error("failed to check low stock product:", err);
+    throw new Error("Failed to check low stock product");
   }
 };
