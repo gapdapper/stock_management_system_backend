@@ -16,13 +16,12 @@ import healthRouter from '@/routes/healthRoutes';
 import cookieParser from 'cookie-parser';
 import {startDailyUploadNotifyJob} from '@/jobs/dailyUploadNotify';
 import {startLowStockNotifyJob} from '@/jobs/lowStockNotify';
-import { startWarmUp } from './utils/warmup';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const corsOptions = {
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
 };
 
@@ -53,9 +52,6 @@ app.use('/api/v1/health', healthRouter);
 
 // Error Handling Middleware
 app.use(errorHandler);
-
-// Start warmup job
-startWarmUp();
 
 app.listen(PORT, (error) =>{
     if(!error)
