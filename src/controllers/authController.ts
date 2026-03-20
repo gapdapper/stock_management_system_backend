@@ -72,7 +72,7 @@ export const login = async (
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE),
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
     return res.status(200).json({
@@ -99,7 +99,7 @@ export const logout = async (
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   return res.status(200).json({ message: "Logout successful" });
@@ -123,7 +123,7 @@ export const refreshToken = async (
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE),
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   return res.status(200).json({ accessToken: newAccessToken });
