@@ -74,3 +74,12 @@ interface IProductVariantDetail {
   minStock: number;
   variantImageUrl: string | null;
 }
+
+export interface ILowstockProduct {
+  variantId: number;
+  qty: number;
+  minStock: number;
+  productName: string | null;
+  colorName: string | null;
+  sizeName: string | null;
+}
