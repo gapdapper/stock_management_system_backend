@@ -9,19 +9,13 @@ jest.mock("@/repositories/authRepository", () => ({
 }));
 
 jest.mock("bcryptjs", () => ({
-  __esModule: true,
-  default: {
     compare: jest.fn(),
     hash: jest.fn(),
-  },
 }));
 
 jest.mock("jsonwebtoken", () => ({
-  __esModule: true,
-  default: {
     sign: jest.fn(),
     verify: jest.fn(),
-  },
 }));
 
 import * as authRepository from "@/repositories/authRepository";
