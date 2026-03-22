@@ -2,7 +2,7 @@
   "name": "stock_management_system_backend",
   "version": "1.0.0",
   "description": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "build": "tsc && tsc-alias",
