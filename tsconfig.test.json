@@ -1,8 +1,9 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
+    "extends": "./tsconfig.json",
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",
+    "rootDir": ".",  
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
@@ -43,7 +44,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src"],
-  "exclude": ["drizzle.config.ts", "node_modules", "tests", "**/*.test.ts"],
+  "include": ["src", "tests"],
+  "exclude": ["drizzle.config.ts", "node_modules"],
 
 }

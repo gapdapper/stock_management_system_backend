@@ -1,16 +1,20 @@
 jest.mock("@/repositories/productVariantRepository", () => ({
   updateById: jest.fn(),
   updateQuantitiesByIds: jest.fn(),
+  findLowStockProductVariant: jest.fn(),
 }));
 
 jest.mock("@/db/supabase", () => ({
   supabase: {},
 }));
 
-import { editProductVariant, restockProductVariant } from "@/services/productVariantService";
+jest.mock("axios");
+
+import { editProductVariant, restockProductVariant, checkLowStockProduct } from "@/services/productVariantService";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
 import BadRequestError from "@/utils/errors/bad-request";
 import NotFoundError from "@/utils/errors/not-found";
+import axios from "axios";
 
 // #region UTC-01-06
 describe("UTC-01-06: editProductVariant", () => {
@@ -155,5 +159,107 @@ describe("UTC-01-07: restockProductVariant", () => {
       .toHaveBeenCalledWith(payload);
 
     expect(result).toEqual({ message: "success" });
+  });
+});
+
+describe("UTC-01-10: checkLowStockProduct()", () => {
+  const mockAxiosPost = axios.post as jest.Mock;
+  const mockRepo =
+    productVariantRepository.findLowStockProductVariant as jest.Mock;
+
+  const mockLowStockProducts = [
+    {
+      productName: "Test Product",
+      colorName: "Red",
+      sizeName: "M",
+      qty: 2,
+      minStock: 10,
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("ID-01: Should do nothing when no low stock products found", async () => {
+    mockRepo.mockResolvedValue([]);
+
+    await checkLowStockProduct();
+
+    expect(mockAxiosPost).not.toHaveBeenCalled();
+  });
+
+  test("ID-02: Should send notification when low stock products exist", async () => {
+    mockRepo.mockResolvedValue(mockLowStockProducts);
+    mockAxiosPost.mockResolvedValue({});
+
+    await checkLowStockProduct();
+
+    expect(mockAxiosPost).toHaveBeenCalledTimes(1);
+
+    const callArgs = mockAxiosPost.mock.calls[0];
+    const body = callArgs[1];
+
+    expect(body.messages[0].text).toContain("สินค้าใกล้หมดสต็อก");
+    expect(body.messages[0].text).toContain("Test Product");
+  });
+
+  test("ID-03: Should format null color and size as '-'", async () => {
+    mockRepo.mockResolvedValue([
+      {
+        productName: "Test Product",
+        colorName: null,
+        sizeName: null,
+        qty: 1,
+        minStock: 5,
+      },
+    ]);
+    mockAxiosPost.mockResolvedValue({});
+
+    await checkLowStockProduct();
+
+    const message = mockAxiosPost.mock.calls[0][1].messages[0].text;
+
+    expect(message).toContain("(- / -)");
+  });
+
+  test("ID-04: Should call axios.post with correct parameters", async () => {
+    mockRepo.mockResolvedValue(mockLowStockProducts);
+    mockAxiosPost.mockResolvedValue({});
+
+    await checkLowStockProduct();
+
+    expect(mockAxiosPost).toHaveBeenCalledWith(
+      expect.any(String), // URL
+      expect.objectContaining({
+        to: expect.any(String),
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            type: "text",
+            text: expect.any(String),
+          }),
+        ]),
+      }),
+      expect.objectContaining({
+        headers: expect.any(Object),
+      }),
+    );
+  });
+
+  test("ID-05: Should throw error when repository fails", async () => {
+    mockRepo.mockRejectedValue(new Error("DB error"));
+
+    await expect(checkLowStockProduct()).rejects.toThrow(
+      "Failed to check low stock product",
+    );
+  });
+
+  test("ID-06: Should throw error when axios.post fails", async () => {
+    mockRepo.mockResolvedValue(mockLowStockProducts);
+    mockAxiosPost.mockRejectedValue(new Error("Network error"));
+
+    await expect(checkLowStockProduct()).rejects.toThrow(
+      "Failed to check low stock product",
+    );
   });
 });

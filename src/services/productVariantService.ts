@@ -1,4 +1,4 @@
-import type { IProductVariant } from "@/models/product";
+import type { ILowstockProduct, IProductVariant } from "@/models/product";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
 import NotFoundError from "@/utils/errors/not-found";
 import { supabase } from "@/db/supabase";
@@ -134,7 +134,7 @@ export const uploadProductImage = async (
 
 export const checkLowStockProduct = async () => {
   try {
-    const lowStockProduct =
+    const lowStockProduct: ILowstockProduct[] =
       await productVariantRepository.findLowStockProductVariant();
     if (lowStockProduct.length === 0) return;
 

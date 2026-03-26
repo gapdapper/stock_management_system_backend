@@ -249,10 +249,11 @@ describe("UTC-04-01: importTransactions()", () => {
 
     mockReq.files = mockFiles;
 
-    (
-      transactionService.processImportedTransactionFiles as jest.Mock
-    ).mockResolvedValue(undefined);
 
+    (transactionService.processImportedTransactionFiles as jest.Mock)
+      .mockResolvedValue([
+        { orderId: "ORD001", insertedId: 1 }
+      ]);
     await importTransactions(
       mockReq as Request,
       mockRes as Response,
@@ -264,7 +265,7 @@ describe("UTC-04-01: importTransactions()", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith({
-      message: "Files processed successfully",
+      result: [{ orderId: "ORD001", insertedId: 1 }],
     });
   });
 

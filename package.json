@@ -9,7 +9,7 @@
     "start": "node dist/app.js",
     "dev": "node --import=tsx --watch src/app.ts",
     "lint": "eslint src/ --ext .ts",
-    "seed": "tsx ./src/db/mock-seeder.ts",
+    "seed": "tsx ./src/db/seeder.ts",
     "test": "jest",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
