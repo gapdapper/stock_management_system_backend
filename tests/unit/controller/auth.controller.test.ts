@@ -75,7 +75,7 @@ describe("UTC-05-01: login()", () => {
       "mock-refresh",
       expect.objectContaining({
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
       }),
     );
 
@@ -151,7 +151,7 @@ describe("UTC-05-02: logout()", () => {
     expect(res.clearCookie).toHaveBeenCalledWith("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
     });
 
     expect(res.status).toHaveBeenCalledWith(200);
@@ -387,7 +387,7 @@ describe("UTC-05-05: refreshToken()", () => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: Number(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE),
-        sameSite: "strict",
+        sameSite: "lax",
       },
     );
 

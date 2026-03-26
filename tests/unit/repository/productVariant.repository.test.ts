@@ -4,6 +4,7 @@ const mockUpdate = jest.fn();
 const mockSet = jest.fn();
 const mockWhere = jest.fn();
 const mockReturning = jest.fn();
+const mockSelect = jest.fn();
 
 // ----- drizzle chain -----
 mockUpdate.mockReturnValue({
@@ -29,6 +30,7 @@ jest.mock("@/db/connect", () => ({
     },
     update: mockUpdate,
     transaction: mockTransaction,
+    select: mockSelect,
   },
 }));
 
@@ -36,12 +38,30 @@ jest.mock("@/db/connect", () => ({
 jest.mock("drizzle-orm", () => ({
   eq: jest.fn(() => "mocked-eq"),
   sql: jest.fn(() => "mocked-sql"),
+  lte: jest.fn(() => "mocked-lte"),
 }));
 
 // ----- schema mock -----
 jest.mock("@/db/schema", () => ({
   productVariant: {
     id: "id",
+    qty: "qty",
+    minStock: "minStock",
+    productId: "productId",
+    colorId: "colorId",
+    sizeId: "sizeId",
+  },
+  product: {
+    id: "productId",
+    productName: "productName",
+  },
+  productColor: {
+    id: "colorId",
+    color: "color",
+  },
+  productSize: {
+    id: "sizeId",
+    size: "size",
   },
 }));
 import * as schema from "@/db/schema";
@@ -50,8 +70,10 @@ import {
   findById,
   updateQuantitiesByIds,
   updateById,
-  updateQuantityById
+  updateQuantityById,
+  findLowStockProductVariant,
 } from "@/repositories/productVariantRepository";
+import db from "@/db/connect";
 
 const createMockVariant = (
   override?: Partial<IProductVariant>,
@@ -67,7 +89,6 @@ const createMockVariant = (
   updatedAt: new Date(),
   ...override,
 });
-
 
 describe("productVariantRepository", () => {
   beforeEach(() => {
@@ -121,7 +142,6 @@ describe("productVariantRepository", () => {
     });
   });
 
-
   // #region UTC-01-12
   describe("UTC-01-12: updateQuantitiesByIds()", () => {
     it("should return NO_VARIANT_PROVIDED when items is undefined", async () => {
@@ -155,19 +175,16 @@ describe("productVariantRepository", () => {
     });
 
     it("should throw error when transaction fails", async () => {
-      mockTransaction.mockRejectedValue(
-        new Error("Transaction failed")
-      );
+      mockTransaction.mockRejectedValue(new Error("Transaction failed"));
 
       const items = [{ variantId: 1, qty: 10 }];
 
       await expect(updateQuantitiesByIds(items)).rejects.toThrow(
-        "Transaction failed"
+        "Transaction failed",
       );
     });
   });
 });
-
 
 // #region UTC-01-10
 describe("UTC-01-10: updateById()", () => {
@@ -212,7 +229,7 @@ describe("UTC-01-10: updateById()", () => {
       expect.objectContaining({
         qty: 50,
         updatedAt: expect.any(Date),
-      })
+      }),
     );
 
     expect(mockWhere).toHaveBeenCalledTimes(1);
@@ -232,9 +249,7 @@ describe("UTC-01-10: updateById()", () => {
   it("UTC-01-03: Should throw error if database fails", async () => {
     mockReturning.mockRejectedValue(new Error("DB Error"));
 
-    await expect(updateById(1, { qty: 10 }))
-      .rejects
-      .toThrow("DB Error");
+    await expect(updateById(1, { qty: 10 })).rejects.toThrow("DB Error");
   });
 });
 
@@ -260,9 +275,7 @@ describe("UTC-04-09: updateQuantityById()", () => {
     const id = 1;
     const quantityChange = 5;
 
-    const mockResult = [
-      { id: 1, qty: 15 },
-    ];
+    const mockResult = [{ id: 1, qty: 15 }];
 
     mockReturning.mockResolvedValue(mockResult);
 
@@ -282,9 +295,7 @@ describe("UTC-04-09: updateQuantityById()", () => {
     const id = 1;
     const quantityChange = -3;
 
-    const mockResult = [
-      { id: 1, qty: 7 },
-    ];
+    const mockResult = [{ id: 1, qty: 7 }];
 
     mockReturning.mockResolvedValue(mockResult);
 
@@ -304,9 +315,64 @@ describe("UTC-04-09: updateQuantityById()", () => {
   it("ID-04: Should throw error when database fails", async () => {
     mockReturning.mockRejectedValue(new Error("Database error"));
 
-    await expect(updateQuantityById(1, 5))
-      .rejects
-      .toThrow("Database error");
+    await expect(updateQuantityById(1, 5)).rejects.toThrow("Database error");
   });
 });
 
+// #region UTC-01-16
+describe("UTC-01-16: findLowStockProductVariant()", () => {
+  let mockWhere: jest.Mock;
+
+  const mockResult = [
+    {
+      variantId: 1,
+      qty: 2,
+      minStock: 10,
+      productName: "Test Product",
+      colorName: "Red",
+      sizeName: "M",
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockWhere = jest.fn().mockResolvedValue(mockResult);
+    let mockLeftJoin: jest.Mock;
+
+    mockLeftJoin = jest.fn();
+
+    mockLeftJoin.mockReturnValue({
+      leftJoin: mockLeftJoin,
+      where: mockWhere,
+    });
+
+    const mockFrom = jest.fn().mockReturnValue({
+      leftJoin: mockLeftJoin,
+    });
+
+    (db.select as jest.Mock).mockReturnValue({
+      from: mockFrom,
+    });
+  });
+
+  test("ID-01: Should return low stock product variants", async () => {
+    const result = await findLowStockProductVariant();
+
+    expect(result).toEqual(mockResult);
+  });
+
+  test("ID-02: Should return empty array when no data found", async () => {
+    mockWhere.mockResolvedValue([]);
+
+    const result = await findLowStockProductVariant();
+
+    expect(result).toEqual([]);
+  });
+
+  test("ID-03: Should throw error when db fails", async () => {
+    mockWhere.mockRejectedValue(new Error("DB error"));
+
+    await expect(findLowStockProductVariant()).rejects.toThrow("DB error");
+  });
+});

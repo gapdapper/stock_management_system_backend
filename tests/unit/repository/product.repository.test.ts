@@ -70,8 +70,8 @@ import type { IProduct } from "@/models/product";
 import { findAllWithVariant, updateById } from "@/repositories/productRepository";
 import * as schema from "@/db/schema";
 
-// #region UTC-01-13
-describe("UTC-01-13: findAllWithVariant()", () => {
+// #region UTC-01-14
+describe("UTC-01-14: findAllWithVariant()", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -143,8 +143,8 @@ describe("UTC-01-13: findAllWithVariant()", () => {
   });
 });
 
-// #region UTC-01-14
-describe("UTC-01-14: updateById()", () => {
+// #region UTC-01-15
+describe("UTC-01-15: updateById()", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
