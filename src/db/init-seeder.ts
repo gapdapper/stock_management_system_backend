@@ -253,7 +253,7 @@ async function main() {
       sizeId: pv.sizeId,
       colorId: pv.colorId,
       qty: 0,
-      minStock: 10,
+      minStock: 0,
     })),
   );
 

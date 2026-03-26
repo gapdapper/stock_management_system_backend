@@ -1,7 +1,7 @@
 import db from "@/db/connect";
 import * as schema from "@/db/schema";
 import type { IProductVariant, IProductVariantPayload } from "@/models/product";
-import { and, eq, lte, sql } from "drizzle-orm";
+import { and, eq, lt, sql } from "drizzle-orm";
 
 export const findAll = async () => {
   const productVariants = await db.query.productVariant.findMany();
@@ -38,7 +38,7 @@ export const updateQuantityById = async (
   const result = await db
     .update(schema.productVariant)
     .set({
-      qty: sql`${schema.productVariant.qty} + ${quantityChange}`,
+      qty: sql`GREATEST(${schema.productVariant.qty} + ${quantityChange}, 0)`,
       updatedAt: new Date(),
     })
     .where(eq(schema.productVariant.id, id))
@@ -93,5 +93,5 @@ export const findLowStockProductVariant = async () => {
     .leftJoin(schema.product, eq(schema.productVariant.productId, schema.product.id))
     .leftJoin(schema.productColor, eq(schema.productVariant.colorId, schema.productColor.id))
     .leftJoin(schema.productSize, eq(schema.productVariant.sizeId, schema.productSize.id))
-    .where(lte(schema.productVariant.qty, schema.productVariant.minStock));
+    .where(lt(schema.productVariant.qty, schema.productVariant.minStock));
 };
