@@ -414,7 +414,7 @@ export const ShopeeProductPattern = [
     externalVariant: {
       colorPatterns: [
         {
-          colorId: 12,
+          colorId: 6,
           color: "Black-White",
           patterns: [/Black-White/i, /ดำ-ขาว/i, /ดำ ขาว/i],
         },
@@ -553,7 +553,7 @@ export const ShopeeProductPattern = [
     externalVariant: {
       colorPatterns: [
         {
-          colorId: 12,
+          colorId: 6,
           color: "Black-White",
           patterns: [/Black-White/i, /ดำ-ขาว/i, /ดำ ขาว/i],
         },
