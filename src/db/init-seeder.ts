@@ -68,6 +68,7 @@ const productNames = [
   "3 in 1 Magnetic Board Game (Backgammon + Chess + Checkers)",
   "Heart Tangram Puzzle",
   "Chess Set 4 in 1",
+  "Trio Domino",
 ];
 
 // ข้อมูล Master Data อื่นๆ ที่ควรเรียงลำดับ ID
@@ -178,6 +179,7 @@ const productSeederConfig = [
   { id: 61, allowedColors: [14], allowedSizes: [5] },
   { id: 62, allowedColors: [14], allowedSizes: [5] },
   { id: 63, allowedColors: [14], allowedSizes: [5] },
+  { id: 64, allowedColors: [14], allowedSizes: [5] },
 ];
 
 export function buildProductVariants() {

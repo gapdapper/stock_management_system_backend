@@ -1035,4 +1035,18 @@ export const ShopeeProductPattern = [
       sizePatterns: [],
     },
   },
+  {
+    productId: 64,
+    productName: "Trio Domino",
+    priority: 100,
+    aliases: [/trio domino/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+  },
 ];

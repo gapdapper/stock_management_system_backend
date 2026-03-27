@@ -659,7 +659,7 @@ export const TikTokProductPattern = [
     },
   },
   {
-    productId: 64,
+    productId: 63,
     productName: "Chess Set 4 in 1",
     priority: 50,
     aliases: [/chess set 4 in 1/i],
@@ -807,6 +807,20 @@ export const TikTokProductPattern = [
     productName: "Draught Board",
     priority: 10,
     aliases: [/draught board/i, /กระดานหมากฮอส/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+  },
+    {
+    productId: 64,
+    productName: "Trio Domino",
+    priority: 100,
+    aliases: [/trio domino/i],
     inlineVariant: {
       colorPatterns: [],
       sizePatterns: [],
