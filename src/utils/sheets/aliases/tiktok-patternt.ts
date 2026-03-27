@@ -19,9 +19,7 @@ export const TikTokProductPattern = [
     priority: 10,
     aliases: [/genga/i, /jenga/i, /คอนโดไม้/i, /ตึกถล่ม/i, /คอนโดไม้ตึกถล่ม/i],
     inlineVariant: {
-      colorPatterns: [
-        { colorId: 9, color: "Colorful", patterns: [/Colorful/i] },
-      ],
+      colorPatterns: [],
       sizePatterns: [
         {
           sizeId: 3,
@@ -816,7 +814,7 @@ export const TikTokProductPattern = [
       sizePatterns: [],
     },
   },
-    {
+  {
     productId: 64,
     productName: "Trio Domino",
     priority: 100,
@@ -828,6 +826,41 @@ export const TikTokProductPattern = [
     externalVariant: {
       colorPatterns: [],
       sizePatterns: [],
+    },
+  },
+  {
+    productId: 65,
+    productName: "Colorful Jenga / Colorful Genga",
+    priority: 100,
+    aliases: [/colorful genga v.2/i, /colorful jenga v.2/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [
+        { sizeId: 6, size: "M V.2", patterns: [/M/i] },
+        { sizeId: 7, size: "L V.2", patterns: [/L/i] },
+      ],
+    },
+  },
+  {
+    productId: 65,
+    productName: "Colorful Jenga / Colorful Genga",
+    priority: 80,
+    aliases: [/colorful genga/i, /colorful jenga/i, /คอนโดไม้ตึกถล่มสี/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [
+        { sizeId: 2, size: "M", patterns: [/M/i] },
+        { sizeId: 3, size: "L", patterns: [/L/i] },
+        { sizeId: 1, size: "S", patterns: [/S/i] },
+      ],
     },
   },
 ];

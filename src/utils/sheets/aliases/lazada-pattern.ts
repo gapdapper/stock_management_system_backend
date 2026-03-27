@@ -5,9 +5,7 @@ export const LazadaProductPattern = [
     priority: 10,
     aliases: [/genga/i, /jenga/i, /คอนโดไม้/i, /ตึกถล่ม/i, /คอนโดไม้ตึกถล่ม/i],
     inlineVariant: {
-      colorPatterns: [
-        { colorId: 9, color: "Colorful", patterns: [/Colorful/i] },
-      ],
+      colorPatterns: [],
       sizePatterns: [
         {
           sizeId: 3,
@@ -952,7 +950,7 @@ export const LazadaProductPattern = [
       sizePatterns: [],
     },
   },
-    {
+  {
     productId: 64,
     productName: "Trio Domino",
     priority: 100,
@@ -964,6 +962,27 @@ export const LazadaProductPattern = [
     externalVariant: {
       colorPatterns: [],
       sizePatterns: [],
+    },
+  },
+  {
+    productId: 65,
+    productName: "Colorful Jenga / Colorful Genga",
+    priority: 80,
+    aliases: [/colorful genga/i, /colorful jenga/i, /คอนโดไม้ตึกถล่มสี/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [
+        { sizeId: 2, size: "M", patterns: [/Size M/i] },
+        { sizeId: 3, size: "L", patterns: [/Size L/i] },
+        { sizeId: 1, size: "S", patterns: [/Size S/i] },
+      ],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [
+        { sizeId: 6, size: "M V.2", patterns: [/:M/i] },
+        { sizeId: 7, size: "L V.2", patterns: [/:L/i] },
+      ],
     },
   },
 ];

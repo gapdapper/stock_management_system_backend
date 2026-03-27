@@ -5,9 +5,7 @@ export const ShopeeProductPattern = [
     priority: 10,
     aliases: [/genga/i, /jenga/i, /คอนโดไม้/i, /ตึกถล่ม/i, /คอนโดไม้ตึกถล่ม/i],
     inlineVariant: {
-      colorPatterns: [
-        { colorId: 9, color: "Colorful", patterns: [/Colorful/i] },
-      ],
+      colorPatterns: [],
       sizePatterns: [
         {
           sizeId: 2,
@@ -1047,6 +1045,26 @@ export const ShopeeProductPattern = [
     externalVariant: {
       colorPatterns: [],
       sizePatterns: [],
+    },
+  },
+  {
+    productId: 65,
+    productName: "Colorful Jenga / Colorful Genga",
+    priority: 100,
+    aliases: [/colorful genga/i, /colorful jenga/i, /คอนโดไม้ตึกถล่มสี/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [
+        { sizeId: 6, size: "M V.2", patterns: [/M\sV\.2/i] },
+        { sizeId: 7, size: "L V.2", patterns: [/L\sV\.2/i] },
+        { sizeId: 2, size: "M", patterns: [/M/i] },
+        { sizeId: 3, size: "L", patterns: [/L/i] },
+        { sizeId: 1, size: "S", patterns: [/S/i] },
+      ],
     },
   },
 ];
