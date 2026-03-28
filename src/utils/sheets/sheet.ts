@@ -2,7 +2,7 @@ import type { TransactionStatus } from "@/models/transaction";
 import { LazadaProductPattern } from "./aliases/lazada-pattern";
 import { PaymentTypeAliases } from "./aliases/payment";
 import { ShopeeProductPattern } from "./aliases/shopee-pattern";
-import { TikTokProductPattern } from "./aliases/tiktok-patternt";
+import { TikTokProductPattern } from "./aliases/tiktok-pattern";
 
 // #region variant/product finder
 export function variantIdFinder(
