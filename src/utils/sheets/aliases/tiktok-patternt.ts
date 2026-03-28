@@ -863,4 +863,18 @@ export const TikTokProductPattern = [
       ],
     },
   },
+  {
+    productId: 42,
+    productName: "English Chess with Draught Pieces V.2",
+    priority: 100,
+    aliases: [/english chess with draught pieces v\.2/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+  },
 ];
