@@ -68,10 +68,12 @@ const productNames = [
   "3 in 1 Magnetic Board Game (Backgammon + Chess + Checkers)",
   "Heart Tangram Puzzle",
   "Chess Set 4 in 1",
+  "Trio Domino",
+  "Colorful Jenga / Colorful Genga",
 ];
 
 // ข้อมูล Master Data อื่นๆ ที่ควรเรียงลำดับ ID
-const sizes = ["Size S", "Size M", "Size L", "Size XL", "No Size"];
+const sizes = ["Size S", "Size M", "Size L", "Size XL", "No Size", "Size M V.2", "Size L V.2"];
 const colors = [
   "Red",
   "Blue",
@@ -109,7 +111,7 @@ const paymentTypes = [
 const productSeederConfig = [
   {
     id: 1,
-    allowedColors: [9, 14],
+    allowedColors: [14],
     allowedSizes: [1, 2, 3, 4, 5],
   },
   {
@@ -136,7 +138,7 @@ const productSeederConfig = [
   { id: 19, allowedColors: [14], allowedSizes: [5] },
   { id: 20, allowedColors: [14], allowedSizes: [5] },
   { id: 21, allowedColors: [14], allowedSizes: [5] },
-  { id: 22, allowedColors: [12, 5], allowedSizes: [5] },
+  { id: 22, allowedColors: [6, 5], allowedSizes: [5] },
   { id: 23, allowedColors: [14], allowedSizes: [5] },
   { id: 24, allowedColors: [14], allowedSizes: [5] },
   { id: 25, allowedColors: [14], allowedSizes: [5] },
@@ -144,7 +146,7 @@ const productSeederConfig = [
   { id: 27, allowedColors: [14], allowedSizes: [5] },
   { id: 28, allowedColors: [14], allowedSizes: [5] },
   { id: 29, allowedColors: [3, 9], allowedSizes: [5] },
-  { id: 30, allowedColors: [12, 5], allowedSizes: [5] },
+  { id: 30, allowedColors: [6, 5], allowedSizes: [5] },
   { id: 31, allowedColors: [14], allowedSizes: [1, 2] },
   { id: 32, allowedColors: [14], allowedSizes: [3] },
   { id: 33, allowedColors: [14], allowedSizes: [5] },
@@ -178,6 +180,8 @@ const productSeederConfig = [
   { id: 61, allowedColors: [14], allowedSizes: [5] },
   { id: 62, allowedColors: [14], allowedSizes: [5] },
   { id: 63, allowedColors: [14], allowedSizes: [5] },
+  { id: 64, allowedColors: [14], allowedSizes: [5] },
+  { id: 65, allowedColors: [14], allowedSizes: [1,2,3,5,6,7] },
 ];
 
 export function buildProductVariants() {
@@ -252,7 +256,7 @@ async function main() {
       productId: pv.productId,
       sizeId: pv.sizeId,
       colorId: pv.colorId,
-      qty: 0,
+      qty: 100,
       minStock: 0,
     })),
   );

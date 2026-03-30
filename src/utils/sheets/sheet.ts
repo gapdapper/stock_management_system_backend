@@ -2,99 +2,86 @@ import type { TransactionStatus } from "@/models/transaction";
 import { LazadaProductPattern } from "./aliases/lazada-pattern";
 import { PaymentTypeAliases } from "./aliases/payment";
 import { ShopeeProductPattern } from "./aliases/shopee-pattern";
-import { TikTokProductPattern } from "./aliases/tiktok-patternt";
+import { TikTokProductPattern } from "./aliases/tiktok-pattern";
 
 // #region variant/product finder
 export function variantIdFinder(
   productId: number,
   productName: string,
   variant: string,
-  provider: string
+  provider: string,
 ) {
   const variantSource = platformMapper(provider).productPattern;
-  let colorId = 14; // default = No Color
-  let sizeId = 5; // default = No Size
-  let isColorMatched = false;
-  let isSizeMatched = false;
 
-  for (const p of variantSource) {
-    if (p.productId === productId) {
-      if (
-        p.inlineVariant.colorPatterns.length === 0 &&
-        p.inlineVariant.sizePatterns.length === 0 &&
-        p.externalVariant.colorPatterns.length === 0 &&
-        p.externalVariant.sizePatterns.length === 0
-      ) {
-        return { colorId: 14, sizeId: 5 };
-      }
+  const DEFAULT_COLOR = 14;
+  const DEFAULT_SIZE = 5;
 
-      if (p.externalVariant.colorPatterns.length > 0) {
-        for (const colorPattern of p.externalVariant.colorPatterns) {
-          for (const pattern of colorPattern.patterns) {
-            const matched = pattern.test(variant);
-            if (matched) {
-              colorId = colorPattern.colorId;
-              isColorMatched = true;
-              break;
-            }
-          }
+  const rules = variantSource
+    .filter((p: any) => p.productId === productId)
+    .sort((a: any, b: any) => b.priority - a.priority);
+
+  const matchPatterns = (patternsGroup: any[], text: string) => {
+    for (const group of patternsGroup) {
+      for (const pattern of group.patterns) {
+        if (pattern.test(text)) {
+          return group;
         }
       }
+    }
+    return null;
+  };
 
-      if (p.externalVariant.sizePatterns.length > 0) {
-        for (const sizePattern of p.externalVariant.sizePatterns) {
-          for (const pattern of sizePattern.patterns) {
-            const matched = pattern.test(variant);
-            if (matched) {
-              sizeId = sizePattern.sizeId;
-              isSizeMatched = true;
-              break;
-            }
-          }
-        }
-      }
+  for (const rule of rules) {
+    const isAliasMatched = rule.aliases.some((a: RegExp) => a.test(productName));
+    if (!isAliasMatched) continue;
+    let colorId = DEFAULT_COLOR;
+    let sizeId = DEFAULT_SIZE;
 
-      if (isColorMatched && isSizeMatched) {
+    if (variant) {
+      const colorMatch = matchPatterns(
+        rule.externalVariant.colorPatterns,
+        variant,
+      );
+      const sizeMatch = matchPatterns(
+        rule.externalVariant.sizePatterns,
+        variant,
+      );
+
+      if (colorMatch) colorId = colorMatch.colorId;
+      if (sizeMatch) sizeId = sizeMatch.sizeId;
+
+      if (colorMatch || sizeMatch) {
         return { colorId, sizeId };
       }
+    }
 
-      if (p.inlineVariant.colorPatterns.length > 0 && !isColorMatched) {
-        for (const colorPattern of p.inlineVariant.colorPatterns) {
-          for (const pattern of colorPattern.patterns) {
-            const matched = pattern.test(productName);
-            if (matched) {
-              colorId = colorPattern.colorId;
-              isColorMatched = true;
-              break;
-            }
-          }
-        }
+    if (productName) {
+      const colorMatch = matchPatterns(
+        rule.inlineVariant.colorPatterns,
+        productName,
+      );
+      const sizeMatch = matchPatterns(
+        rule.inlineVariant.sizePatterns,
+        productName,
+      );
+
+      if (colorMatch) colorId = colorMatch.colorId;
+      if (sizeMatch) sizeId = sizeMatch.sizeId;
+
+      if (colorMatch || sizeMatch) {
+        return { colorId, sizeId };
       }
-
-      if (p.inlineVariant.sizePatterns.length > 0 && !isSizeMatched) {
-        for (const sizePattern of p.inlineVariant.sizePatterns) {
-          for (const pattern of sizePattern.patterns) {
-            const matched = pattern.test(productName);
-            if (matched) {
-              sizeId = sizePattern.sizeId;
-              isSizeMatched = true;
-              break;
-            }
-          }
-        }
-      }
-
-      return { colorId, sizeId };
     }
   }
-  return { colorId, sizeId };
+
+  return { colorId: DEFAULT_COLOR, sizeId: DEFAULT_SIZE };
 }
 
 export function productIdFinder(productName: string, provider: string) {
   const productPattern = platformMapper(provider).productPattern;
 
   const prioritizedPatterns = productPattern.sort(
-    (a: any, b: any) => b.priority - a.priority
+    (a: any, b: any) => b.priority - a.priority,
   );
 
   for (const p of prioritizedPatterns) {
@@ -137,40 +124,52 @@ export function platformMapper(rawPlatform: string): any {
   return mapping[rawPlatform] || 1;
 }
 
-export function statusMapper(rawStatus: string, provider: string): TransactionStatus {
+export function statusMapper(
+  rawStatus: string,
+  provider: string,
+): TransactionStatus {
   if (provider === "shopee") {
     const statusMapping: Record<string, string> = {
-      "สำเร็จแล้ว": "completed",
-      "จัดส่งสำเร็จแล้ว": "delivered",
-      "ยกเลิกแล้ว": "cancelled",
-      "การจัดส่ง": "shipped",
-      "ที่ต้องจัดส่ง": "order placed",
+      สำเร็จแล้ว: "completed",
+      จัดส่งสำเร็จแล้ว: "delivered",
+      ยกเลิกแล้ว: "cancelled",
+      การจัดส่ง: "shipped",
+      ที่ต้องจัดส่ง: "order placed",
     };
     if (rawStatus.startsWith("ผู้ซื้อได้รับสินค้าแล้ว")) return "delivered";
-    return statusMapping[rawStatus as string] as TransactionStatus || "order placed";
+    return (
+      (statusMapping[rawStatus as string] as TransactionStatus) ||
+      "order placed"
+    );
   }
 
   if (provider === "lazada") {
-        const statusMapping: Record<string, string> = {
-      "confirmed": "completed",
-      "delivered": "delivered",
-      "ยกเลิกแล้ว": "cancelled",
-      "shipped": "shipped",
-      "pending": "order placed",
+    const statusMapping: Record<string, string> = {
+      confirmed: "completed",
+      delivered: "delivered",
+      ยกเลิกแล้ว: "cancelled",
+      shipped: "shipped",
+      pending: "order placed",
     };
 
-    return statusMapping[rawStatus as string] as TransactionStatus || "order placed";
+    return (
+      (statusMapping[rawStatus as string] as TransactionStatus) ||
+      "order placed"
+    );
   }
 
-    if (provider === "tiktok") {
-        const statusMapping: Record<string, string> = {
-      "เสร็จสมบูรณ์": "completed",
-      "ยกเลิกแล้ว": "cancelled",
-      "จัดส่งแล้ว": "shipped",
-      "ที่จะจัดส่ง": "order placed",
+  if (provider === "tiktok") {
+    const statusMapping: Record<string, string> = {
+      เสร็จสมบูรณ์: "completed",
+      ยกเลิกแล้ว: "cancelled",
+      จัดส่งแล้ว: "shipped",
+      ที่จะจัดส่ง: "order placed",
     };
 
-    return statusMapping[rawStatus as string] as TransactionStatus || "order placed";
+    return (
+      (statusMapping[rawStatus as string] as TransactionStatus) ||
+      "order placed"
+    );
   }
 
   return "order placed";
