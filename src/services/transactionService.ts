@@ -2,8 +2,6 @@ import NotFoundError from "@/utils/errors/not-found";
 import type {
   ITransaction,
   ITransactionItem,
-  ITransactionResponse,
-  TransactionStatus,
 } from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
@@ -13,9 +11,8 @@ import {
   cleanSheetData,
   lookupPaymentTypeId,
   platformMapper,
-  productIdFinder,
+  resolveVariant,
   statusMapper,
-  variantIdFinder,
 } from "@/utils/sheets/sheet";
 import { SignatureRules } from "@/utils/sheets/rules";
 import BadRequestError from "@/utils/errors/bad-request";
@@ -34,28 +31,15 @@ export const getTransactions = async () => {
   return transactions;
 };
 
-export const getTransactionById = async (transactionId: number) => {
-  const transaction = await transactionRepository.findTransactionById(
-    transactionId
-  );
-  if (!transaction) {
-    throw new NotFoundError({
-      code: 404,
-      message: `Transaction with ID ${transactionId} not found`,
-      logging: false,
-    });
-  }
-  return transaction;
-};
 
-export const getTransactionByOrderId = async (orderId: string) => {
-  const transaction = await transactionRepository.findTransactionByOrderId(
-    orderId
+export const getTransactionById = async (id: number) => {
+  const transaction = await transactionRepository.findTransactionById(
+    id
   );
   if (!transaction) {
     throw new NotFoundError({
       code: 404,
-      message: `Transaction with Order ID ${orderId} not found`,
+      message: `Transaction with ID ${id} not found`,
       logging: false,
     });
   }
@@ -183,18 +167,17 @@ export const deleteTransactionItem = async (
 
 // #region Transaction Upload
 export const processImportedTransactionFiles = async (
-  files: Express.Multer.File[]
+  files: Express.Multer.File[],
 ) => {
   try {
-    if(!files || !Array.isArray(files) || files.length === 0){
-          throw new BadRequestError({
-          code: 400,
-          message: "transaction file is required",
-          logging: true,
-        });
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      throw new BadRequestError({
+        code: 400,
+        message: "transaction file is required",
+        logging: true,
+      });
     }
-  
-  
+
     let transactionBatch: ITransaction[] = [];
     let transactionItemBatch: ITransactionItem[] = [];
     let itemQuantity: { productVariantId: number; quantity: number }[] = [];
@@ -207,7 +190,7 @@ export const processImportedTransactionFiles = async (
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       if (worksheet === undefined) {
         throw new Error(
-          "Failed to read the first sheet of the uploaded spreadsheet"
+          "Failed to read the first sheet of the uploaded spreadsheet",
         );
       }
       const headers = XLSX.utils.sheet_to_json(worksheet, {
@@ -218,7 +201,7 @@ export const processImportedTransactionFiles = async (
         rawData = cleanSheetData(rawData);
       }
       const detected = SignatureRules.find((rule) =>
-        rule.mustHave.every((header) => headers.includes(header))
+        rule.mustHave.every((header) => headers.includes(header)),
       );
 
       if (!detected) {
@@ -234,7 +217,8 @@ export const processImportedTransactionFiles = async (
         let result: Record<string, any> = {};
         const index = SignatureRules.findIndex(
           (r) =>
-            r.provider === detected.provider && r.fileType === detected.fileType
+            r.provider === detected.provider &&
+            r.fileType === detected.fileType,
         );
 
         for (const key of detected.keyColumns) {
@@ -250,25 +234,18 @@ export const processImportedTransactionFiles = async (
             result[value] !== undefined ? result[value] : null;
         }
 
-        const productId =
-          productIdFinder(normalizedResult["productName"], provider) || 0;
-          const { colorId, sizeId } = variantIdFinder(
-            productId,
-            normalizedResult["productName"],
-            normalizedResult["variation"],
-            provider
-          );
-        const productVariant =
-          await productVariantRepository.findByProductIdAndAttributesId(
-            productId,
-            colorId,
-            sizeId
-          );
+        const resolved = await resolveVariant(
+          platformMapper(provider).id,
+          normalizedResult["parentSku"],
+          normalizedResult["productName"],
+          normalizedResult["variation"],
+        );
+
         const quantity = parseInt(normalizedResult["quantity"]) || 1;
 
-        if (productId === 0) {
+        if (resolved?.productId === 0) {
           console.warn(
-            `Product not found: ${normalizedResult["productName"]} from provider ${provider}`
+            `Product not found: ${normalizedResult["productName"]} from provider ${provider}`,
           );
           continue;
         }
@@ -280,7 +257,8 @@ export const processImportedTransactionFiles = async (
           shippingPostalCode: normalizedResult["postalCode"],
           platformId: platformMapper(provider).id,
           status:
-            normalizedResult["cancelReason"] === "" || !normalizedResult["cancelReason"]
+            normalizedResult["cancelReason"] === "" ||
+            !normalizedResult["cancelReason"]
               ? statusMapper(normalizedResult["status"], provider)
               : "returned",
           note: normalizedResult["cancelReason"] || "N/A",
@@ -296,21 +274,21 @@ export const processImportedTransactionFiles = async (
         const transactionItem = {
           transactionId: 0, // to be filled after transaction is created
           orderId: normalizedResult["orderId"],
-          productId: productId,
-          productVariantId: productVariant ? productVariant.id : 0,
+          productId: resolved?.productId!,
+          productVariantId: resolved?.productVariantId || 0,
           quantity: quantity,
         };
 
         // if orderId exists, update status only
         const existingTransaction =
           await transactionRepository.findTransactionByOrderId(
-            transaction.orderId
+            transaction.orderId,
           );
-       
+
         // new transaction
         if (!existingTransaction || existingTransaction.length == 0) {
           const duplicate = transactionBatch.find(
-            (t) => t.orderId === transaction.orderId
+            (t) => t.orderId === transaction.orderId,
           );
           if (!duplicate) {
             transactionBatch.push(transaction);
@@ -320,7 +298,7 @@ export const processImportedTransactionFiles = async (
             (ti) =>
               ti.orderId === transactionItem.orderId &&
               ti.productId === transactionItem.productId &&
-              ti.productVariantId === transactionItem.productVariantId
+              ti.productVariantId === transactionItem.productVariantId,
           );
           if (!duplicateItem) {
             transactionItemBatch.push(transactionItem);
@@ -331,7 +309,7 @@ export const processImportedTransactionFiles = async (
           if (transaction.status !== "cancelled") {
             const quantityChange = -quantity;
             const existingItemQuantity = itemQuantity.find(
-              (iq) => iq.productVariantId === transactionItem.productVariantId
+              (iq) => iq.productVariantId === transactionItem.productVariantId,
             );
             if (existingItemQuantity) {
               existingItemQuantity.quantity += quantityChange;
@@ -347,7 +325,7 @@ export const processImportedTransactionFiles = async (
           if (existingTransaction[0]?.status !== transaction.status) {
             await transactionRepository.updateTransactionStatus(
               transaction.orderId,
-              transaction.status
+              transaction.status,
             );
           }
         }
@@ -370,7 +348,7 @@ export const processImportedTransactionFiles = async (
     // map transactionIds to transaction items then bulk insert
     for (const item of transactionItemBatch) {
       const created = createdTransaction.find(
-        (t) => t.orderId === item.orderId
+        (t) => t.orderId === item.orderId,
       );
       if (created) {
         item.transactionId = created.insertedId;
@@ -378,14 +356,14 @@ export const processImportedTransactionFiles = async (
       }
     }
     await transactionRepository.createManyTransactionItems(
-      transactionItemBatch
+      transactionItemBatch,
     );
 
     // alter stock quantity
     for (const iq of itemQuantity) {
       await productVariantRepository.updateQuantityById(
         iq.productVariantId,
-        iq.quantity
+        iq.quantity,
       );
     }
     return transactionBatch;

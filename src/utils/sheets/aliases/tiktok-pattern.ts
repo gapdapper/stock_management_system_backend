@@ -19,9 +19,7 @@ export const TikTokProductPattern = [
     priority: 10,
     aliases: [/genga/i, /jenga/i, /คอนโดไม้/i, /ตึกถล่ม/i, /คอนโดไม้ตึกถล่ม/i],
     inlineVariant: {
-      colorPatterns: [
-        { colorId: 9, color: "Colorful", patterns: [/Colorful/i] },
-      ],
+      colorPatterns: [],
       sizePatterns: [
         {
           sizeId: 3,
@@ -476,7 +474,7 @@ export const TikTokProductPattern = [
     externalVariant: {
       colorPatterns: [
         {
-          colorId: 12,
+          colorId: 6,
           color: "Black-White",
           patterns: [/Black-White/i, /ดำ-ขาว/i, /ดำ ขาว/i],
         },
@@ -558,7 +556,7 @@ export const TikTokProductPattern = [
     externalVariant: {
       colorPatterns: [
         {
-          colorId: 12,
+          colorId: 6,
           color: "Black-White",
           patterns: [/Black-White/i, /ดำ-ขาว/i, /ดำ ขาว/i],
         },
@@ -659,7 +657,7 @@ export const TikTokProductPattern = [
     },
   },
   {
-    productId: 64,
+    productId: 63,
     productName: "Chess Set 4 in 1",
     priority: 50,
     aliases: [/chess set 4 in 1/i],
@@ -807,6 +805,69 @@ export const TikTokProductPattern = [
     productName: "Draught Board",
     priority: 10,
     aliases: [/draught board/i, /กระดานหมากฮอส/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+  },
+  {
+    productId: 64,
+    productName: "Trio Domino",
+    priority: 100,
+    aliases: [/trio domino/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+  },
+  {
+    productId: 65,
+    productName: "Colorful Jenga / Colorful Genga",
+    priority: 100,
+    aliases: [/colorful genga v.2/i, /colorful jenga v.2/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [
+        { sizeId: 6, size: "M V.2", patterns: [/M/i] },
+        { sizeId: 7, size: "L V.2", patterns: [/L/i] },
+      ],
+    },
+  },
+  {
+    productId: 65,
+    productName: "Colorful Jenga / Colorful Genga",
+    priority: 80,
+    aliases: [/colorful genga/i, /colorful jenga/i, /คอนโดไม้ตึกถล่มสี/i],
+    inlineVariant: {
+      colorPatterns: [],
+      sizePatterns: [],
+    },
+    externalVariant: {
+      colorPatterns: [],
+      sizePatterns: [
+        { sizeId: 2, size: "M", patterns: [/M/i] },
+        { sizeId: 3, size: "L", patterns: [/L/i] },
+        { sizeId: 1, size: "S", patterns: [/S/i] },
+      ],
+    },
+  },
+  {
+    productId: 42,
+    productName: "English Chess with Draught Pieces V.2",
+    priority: 100,
+    aliases: [/english chess with draught pieces v\.2/i],
     inlineVariant: {
       colorPatterns: [],
       sizePatterns: [],

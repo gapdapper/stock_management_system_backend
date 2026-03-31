@@ -5,7 +5,7 @@ let job: CronJob | null = null;
 
 export function startLowStockNotifyJob() {
   if (job) return; // Job already started
-  const schedule = "0 12 * * *";
+  const schedule = "0 12 * * 5"; // every Friday
 
   job = new CronJob(
     schedule, // Runs every day at lunch time

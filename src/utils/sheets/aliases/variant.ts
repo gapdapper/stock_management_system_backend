@@ -19,6 +19,14 @@ export const SizeAliases = [
     id: 5,
     variant: "No Size",
   },
+    {
+    id: 6,
+    variant: "Size M V.2",
+  },
+    {
+    id: 7,
+    variant: "Size L V.2",
+  },
 ];
 
 export const ColorAliases = [

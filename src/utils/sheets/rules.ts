@@ -12,6 +12,7 @@ export const SignatureRules = [
       "ชื่อสินค้า",
       "ชื่อตัวเลือก",
       "จำนวน",
+      "เลขอ้างอิง Parent SKU",
     ],
     normalizedColumns: {
       orderId: "หมายเลขคำสั่งซื้อ",
@@ -23,6 +24,7 @@ export const SignatureRules = [
       productName: "ชื่อสินค้า",
       variation: "ชื่อตัวเลือก",
       quantity: "จำนวน",
+      parentSku: "เลขอ้างอิง Parent SKU",
     },
   },
   {
@@ -38,6 +40,7 @@ export const SignatureRules = [
       "buyerFailedDeliveryReturnInitiator",
       "itemName",
       "variation",
+      "sellerSku",
     ],
     normalizedColumns: {
       orderId: "orderItemId",
@@ -49,6 +52,7 @@ export const SignatureRules = [
       productName: "itemName",
       variation: "variation",
       quantity: "-",
+      parentSku: "sellerSku",
     },
   },
   {
@@ -63,6 +67,7 @@ export const SignatureRules = [
       "Variation",
       "Quantity",
       "Cancelation/Return Type",
+      "Seller SKU",
     ],
     normalizedColumns: {
       orderId: "Order ID",
@@ -74,6 +79,7 @@ export const SignatureRules = [
       productName: "Product Name",
       variation: "Variation",
       quantity: "Quantity",
+      parentSku: "Seller SKU",
     },
   }
 ];
