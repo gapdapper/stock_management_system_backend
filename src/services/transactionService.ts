@@ -2,8 +2,6 @@ import NotFoundError from "@/utils/errors/not-found";
 import type {
   ITransaction,
   ITransactionItem,
-  ITransactionResponse,
-  TransactionStatus,
 } from "@/models/transaction";
 import * as transactionRepository from "@/repositories/transactionRepository";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
@@ -13,10 +11,8 @@ import {
   cleanSheetData,
   lookupPaymentTypeId,
   platformMapper,
-  productIdFinder,
   resolveVariant,
   statusMapper,
-  variantIdFinder,
 } from "@/utils/sheets/sheet";
 import { SignatureRules } from "@/utils/sheets/rules";
 import BadRequestError from "@/utils/errors/bad-request";

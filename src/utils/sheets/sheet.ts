@@ -1,105 +1,7 @@
 import type { TransactionStatus } from "@/models/transaction";
-import { LazadaProductPattern } from "./aliases/lazada-pattern";
 import { PaymentTypeAliases } from "./aliases/payment";
-import { ShopeeProductPattern } from "./aliases/shopee-pattern";
-import { TikTokProductPattern } from "./aliases/tiktok-pattern";
 import * as platformProductMappingRepository from "@/repositories/platformProductMappingRepository";
-import * as variantMappingRepository from "@/repositories/variantMappingRepository";
 import * as productVariantRepository from "@/repositories/productVariantRepository";
-import { platform } from "@/db/schema";
-
-// #region variant/product finder
-export function variantIdFinder(
-  productId: number,
-  productName: string,
-  variant: string,
-  provider: string,
-) {
-  const variantSource = platformMapper(provider).productPattern;
-
-  const DEFAULT_COLOR = 14;
-  const DEFAULT_SIZE = 5;
-
-  const rules = variantSource
-    .filter((p: any) => p.productId === productId)
-    .sort((a: any, b: any) => b.priority - a.priority);
-
-  const matchPatterns = (patternsGroup: any[], text: string) => {
-    for (const group of patternsGroup) {
-      for (const pattern of group.patterns) {
-        if (pattern.test(text)) {
-          return group;
-        }
-      }
-    }
-    return null;
-  };
-
-  for (const rule of rules) {
-    const isAliasMatched = rule.aliases.some((a: RegExp) =>
-      a.test(productName),
-    );
-    if (!isAliasMatched) continue;
-    let colorId = DEFAULT_COLOR;
-    let sizeId = DEFAULT_SIZE;
-
-    if (variant) {
-      const colorMatch = matchPatterns(
-        rule.externalVariant.colorPatterns,
-        variant,
-      );
-      const sizeMatch = matchPatterns(
-        rule.externalVariant.sizePatterns,
-        variant,
-      );
-
-      if (colorMatch) colorId = colorMatch.colorId;
-      if (sizeMatch) sizeId = sizeMatch.sizeId;
-
-      if (colorMatch || sizeMatch) {
-        return { colorId, sizeId };
-      }
-    }
-
-    if (productName) {
-      const colorMatch = matchPatterns(
-        rule.inlineVariant.colorPatterns,
-        productName,
-      );
-      const sizeMatch = matchPatterns(
-        rule.inlineVariant.sizePatterns,
-        productName,
-      );
-
-      if (colorMatch) colorId = colorMatch.colorId;
-      if (sizeMatch) sizeId = sizeMatch.sizeId;
-
-      if (colorMatch || sizeMatch) {
-        return { colorId, sizeId };
-      }
-    }
-  }
-
-  return { colorId: DEFAULT_COLOR, sizeId: DEFAULT_SIZE };
-}
-
-export function productIdFinder(productName: string, provider: string) {
-  const productPattern = platformMapper(provider).productPattern;
-
-  const prioritizedPatterns = productPattern.sort(
-    (a: any, b: any) => b.priority - a.priority,
-  );
-
-  for (const p of prioritizedPatterns) {
-    for (const a of p.aliases) {
-      const matched = a.test(productName);
-      if (matched) {
-        return p.productId;
-      }
-    }
-  }
-}
-// #endregion variant/product finder
 
 // #region mapper
 export function paymentTypeMapper(rawPaymentType: string): number {
@@ -116,15 +18,12 @@ export function platformMapper(rawPlatform: string): any {
   const mapping: Record<string, any> = {
     shopee: {
       id: 1,
-      productPattern: ShopeeProductPattern,
     },
     lazada: {
       id: 2,
-      productPattern: LazadaProductPattern,
     },
     tiktok: {
       id: 3,
-      productPattern: TikTokProductPattern,
     },
   };
   return mapping[rawPlatform] || 1;
@@ -221,7 +120,7 @@ export function cleanSheetData(rawData: any[]): any[] {
 // #endregion other helpers
 
 
-// #region improved resolver
+// #region variant/product finder
 function normalize(text: string) {
   return text.toLowerCase().replace(/\./g, "").replace(/\s+/g, " ").trim();
 }
@@ -249,11 +148,6 @@ export async function resolveVariant(
       productId = mappedProduct.productId;
     }
   }
-
-  // 🟡 fallback
-  // if (!productId) {
-  //   productId = productIdFinder(productName, ""); // ใช้ของเดิมไปก่อน
-  // }
 
   if (!productId) return null;
 
@@ -463,4 +357,4 @@ export function smartVariantResolver(
 
   return { colorId, sizeId };
 }
-// #endregion improved resolver 
+// #endregion variant/product finder
