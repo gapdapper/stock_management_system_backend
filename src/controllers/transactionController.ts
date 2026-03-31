@@ -12,12 +12,12 @@ export const getTransaction = async (req: Request, res: Response, next: NextFunc
 }
 
 export const getTransactionById = async (req: Request, res: Response, next: NextFunction) => {
-    const transactionId = req.params.id;
-    if (!transactionId) {
+    const transactionId = Number(req.params.id);
+    if (isNaN(transactionId)) {
         return res.status(400).json({ message: 'Invalid transactionId' });
     }
     try {
-        const result = await transactionService.getTransactionByOrderId(transactionId);
+        const result = await transactionService.getTransactionById(transactionId);
         return res.status(200).json({ transaction: result });
     } catch (error) {
         next(error);

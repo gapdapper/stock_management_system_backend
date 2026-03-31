@@ -34,10 +34,52 @@ export const findAllTransactions = async () => {
   return transactions;
 };
 
-export const findTransactionById = async (transactionId: number) => {
-  const transaction = await db.query.transaction.findFirst({
-    where: eq(schema.transaction.id, transactionId),
-  });
+export const findTransactionById = async (id: number) => {
+const transaction = await db
+    .select({
+      orderId: schema.transaction.orderId,
+      buyer: schema.transaction.buyer,
+      status: schema.transaction.status,
+      createdAt: schema.transaction.createdAt,
+      paymentType: schema.paymentType.paymentType,
+      platform: schema.platform.platformName,
+
+      variantId: schema.transactionItem.productVariantId,
+      productName: schema.product.productName,
+      size: schema.productSize.size,
+      color: schema.productColor.color,
+      quantity: schema.transactionItem.quantity,
+    })
+    .from(schema.transaction)
+    .innerJoin(
+      schema.paymentType,
+      eq(schema.transaction.paymentTypeId, schema.paymentType.id),
+    )
+    .innerJoin(
+      schema.platform,
+      eq(schema.transaction.platformId, schema.platform.id),
+    )
+    .innerJoin(
+      schema.transactionItem,
+      eq(schema.transaction.id, schema.transactionItem.transactionId),
+    )
+    .innerJoin(
+      schema.product,
+      eq(schema.transactionItem.productId, schema.product.id),
+    )
+    .innerJoin(
+      schema.productVariant,
+      eq(schema.transactionItem.productVariantId, schema.productVariant.id),
+    )
+    .innerJoin(
+      schema.productColor,
+      eq(schema.productVariant.colorId, schema.productColor.id),
+    )
+    .innerJoin(
+      schema.productSize,
+      eq(schema.productVariant.sizeId, schema.productSize.id),
+    )
+    .where(eq(schema.transaction.id, id));
   return transaction;
 };
 
