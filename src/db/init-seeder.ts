@@ -772,7 +772,7 @@ async function main() {
         productId,
         sizeId: sizeMap[v.size],
         colorId: colorMap[v.color],
-        qty: 50,
+        qty: 0,
         minStock: 0,
       });
     }
