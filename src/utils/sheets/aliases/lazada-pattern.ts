@@ -85,12 +85,22 @@ export const LazadaProductPattern = [
         {
           sizeId: 3,
           size: "L",
-          patterns: [/\bsize\s*L\b/i, /\bไซส์\s*L\b/i, /\bL\b/i],
+          patterns: [
+            /\bsize\s*L\b/i,
+            /\bไซส์\s*L\b/i,
+            /size\s*L/i,
+            /ไซส์\s*L/i,
+          ],
         },
         {
           sizeId: 1,
           size: "S",
-          patterns: [/\bsize\s*S\b/i, /\bไซส์\s*S\b/i, /\bS\b/i],
+          patterns: [
+            /\bsize\s*S\b/i,
+            /\bไซส์\s*S\b/i,
+            /size\s*S/i,
+            /ไซส์\s*S/i,
+          ],
         },
       ],
     },
