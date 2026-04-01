@@ -1,6 +1,6 @@
 jest.mock("@/services/transactionService", () => ({
   getTransactions: jest.fn(),
-  getTransactionByOrderId: jest.fn(),
+  getTransactionById: jest.fn(),
   processImportedTransactionFiles: jest.fn(),
 }));
 
@@ -130,7 +130,7 @@ describe("UTC-03-02: getTransactionById()", () => {
       message: "Invalid transactionId",
     });
 
-    expect(transactionService.getTransactionByOrderId).not.toHaveBeenCalled();
+    expect(transactionService.getTransactionById).not.toHaveBeenCalled();
     expect(mockNext).not.toHaveBeenCalled();
   });
 
@@ -154,10 +154,10 @@ describe("UTC-03-02: getTransactionById()", () => {
     };
 
     mockReq = {
-      params: { id: "ORD001" },
+      params: { id: "1" },
     };
 
-    (transactionService.getTransactionByOrderId as jest.Mock)
+    (transactionService.getTransactionById as jest.Mock)
       .mockResolvedValue(mockResult);
 
     await getTransactionById(
@@ -166,8 +166,8 @@ describe("UTC-03-02: getTransactionById()", () => {
       mockNext
     );
 
-    expect(transactionService.getTransactionByOrderId)
-      .toHaveBeenCalledWith("ORD001");
+    expect(transactionService.getTransactionById)
+      .toHaveBeenCalledWith(1);
 
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith({
@@ -181,10 +181,10 @@ describe("UTC-03-02: getTransactionById()", () => {
     const mockError = new Error("Database error");
 
     mockReq = {
-      params: { id: "ORD001" },
+      params: { id: "1" },
     };
 
-    (transactionService.getTransactionByOrderId as jest.Mock)
+    (transactionService.getTransactionById as jest.Mock)
       .mockRejectedValue(mockError);
 
     await getTransactionById(
@@ -193,8 +193,8 @@ describe("UTC-03-02: getTransactionById()", () => {
       mockNext
     );
 
-    expect(transactionService.getTransactionByOrderId)
-      .toHaveBeenCalledWith("ORD001");
+    expect(transactionService.getTransactionById)
+      .toHaveBeenCalledWith(1);
 
     expect(mockNext).toHaveBeenCalledWith(mockError);
     expect(mockRes.status).not.toHaveBeenCalled();
