@@ -13,6 +13,7 @@ import dailyUploadLogRouter from '@/routes/dailyUploadLogRoutes';
 import dashboardRouter from '@/routes/dashboardRoutes';
 import webhookRouter from '@/routes/webhookRoutes';
 import healthRouter from '@/routes/healthRoutes';
+import cronRouter from '@/routes/cronRoutes';
 import cookieParser from 'cookie-parser';
 import {startDailyUploadNotifyJob} from '@/jobs/dailyUploadNotify';
 import {startLowStockNotifyJob} from '@/jobs/lowStockNotify';
@@ -49,6 +50,7 @@ app.use('/api/v1/dailyUploadLog', dailyUploadLogRouter);
 app.use('/api/v1/dashboard', dashboardRouter);
 app.use('/api/v1/webhooks', webhookRouter);
 app.use('/api/v1/health', healthRouter);
+app.use('/api/v1/cron', cronRouter);
 
 // Error Handling Middleware
 app.use(errorHandler);
