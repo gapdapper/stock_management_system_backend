@@ -706,103 +706,15 @@ async function resetIdentitySequences() {
 }
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Seeding EMPTY database...");
 
   const adminPassword = await bcrypt.hash("admin123", 10);
 
-  // 1. reset
+  // 1. reset database
   await reset(db, schema);
   await resetIdentitySequences();
 
-  // 2. prepare data from mappings
-  const productNames = mappings.map((m) => m.productName);
-
-  const orderedSizes = sizes;
-  const orderedColors = colors;
-
-  // 3. insert product
-  const insertedProducts = await db
-    .insert(schema.product)
-    .values(productNames.map((name) => ({ productName: name })))
-    .returning();
-
-  const productMap = Object.fromEntries(
-    insertedProducts.map((p) => [p.productName, p.id]),
-  );
-
-  // 4. insert size
-  // size
-  const insertedSizes = await db
-    .insert(schema.productSize)
-    .values(orderedSizes.map((s) => ({ size: s })))
-    .returning();
-
-  const sizeMap = Object.fromEntries(insertedSizes.map((s) => [s.size, s.id]));
-
-  // color
-  const insertedColors = await db
-    .insert(schema.productColor)
-    .values(orderedColors.map((c) => ({ color: c })))
-    .returning();
-
-  const colorMap = Object.fromEntries(
-    insertedColors.map((c) => [c.color, c.id]),
-  );
-
-  // 6. insert platform
-  const insertedPlatforms = await db
-    .insert(schema.platform)
-    .values(platforms.map((p) => ({ platformName: p })))
-    .returning();
-
-  const platformMap = Object.fromEntries(
-    insertedPlatforms.map((p) => [p.platformName!.toLowerCase(), p.id]),
-  );
-
-  // 7. build variant + mapping rows
-  const variantRows: any[] = [];
-  const mappingRows: any[] = [];
-
-  for (const p of mappings) {
-    const productId = productMap[p.productName];
-
-    // variants
-    for (const v of p.variants) {
-      variantRows.push({
-        productId,
-        sizeId: sizeMap[v.size],
-        colorId: colorMap[v.color],
-        qty: 50,
-        minStock: 0,
-      });
-    }
-
-    // platform SKU mapping (parent level)
-    for (const plat of p.platforms) {
-      mappingRows.push({
-        productId,
-        platformId: platformMap[plat.platform.toLowerCase()],
-        externalProductSku: plat.sku,
-      });
-    }
-  }
-
-  // 8. bulk insert
-  await db.insert(schema.productVariant).values(variantRows);
-  await db.insert(schema.platformProductMapping).values(mappingRows);
-
-  // 9. payment + user + log (เหมือนเดิม)
-  await db
-    .insert(schema.paymentType)
-    .values(paymentTypes.map((pt) => ({ paymentType: pt })));
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  await db.insert(schema.dailyUploadLog).values({
-    uploadAt: yesterday,
-  });
-
+  // 2. insert users
   await db.insert(schema.users).values([
     {
       username: "admin",
@@ -816,7 +728,13 @@ async function main() {
     },
   ]);
 
-  console.log("Seeding completed.");
+  // 3. insert daily upload log
+
+  await db.insert(schema.dailyUploadLog).values({
+    uploadAt: new Date(),
+  });
+
+  console.log("Empty seed completed (accounts + daily upload).");
 }
 
 main();

@@ -112,8 +112,6 @@ export const transactionItem = pgTable("transaction_item", {
     .notNull()
     .references(() => productVariant.id),
   quantity: t.integer(),
-  externalProductSku: t.varchar("external_product_sku"),
-  externalVariantText: t.varchar("external_variant_text"),
   updatedAt: t.timestamp("updated_at").notNull().defaultNow(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 });
