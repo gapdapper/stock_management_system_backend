@@ -38,7 +38,7 @@ jest.mock("@/db/connect", () => ({
 jest.mock("drizzle-orm", () => ({
   eq: jest.fn(() => "mocked-eq"),
   sql: jest.fn(() => "mocked-sql"),
-  lte: jest.fn(() => "mocked-lte"),
+  lt: jest.fn(() => "mocked-lt"),
 }));
 
 // ----- schema mock -----
