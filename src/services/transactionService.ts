@@ -243,7 +243,7 @@ export const processImportedTransactionFiles = async (
 
         const quantity = parseInt(normalizedResult["quantity"]) || 1;
 
-        if (resolved?.productId === 0) {
+        if (!resolved || resolved.productId === 0) {
           console.warn(
             `Product not found: ${normalizedResult["productName"]} from provider ${provider}`,
           );
