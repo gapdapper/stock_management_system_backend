@@ -245,10 +245,10 @@ async function main() {
 
 // ใช้ค่าเดียว
 const insertedPlatforms = await db.select().from(schema.platform);
-const platformId = insertedPlatforms[0].id; // เช่น Shopee
+const platformId = insertedPlatforms[0]!.id; // เช่น Shopee
 
 const paymentTypeList = await db.select().from(schema.paymentType);
-const paymentTypeId = paymentTypeList[0].id; // เช่น Credit Card
+const paymentTypeId = paymentTypeList[0]!.id; // เช่น Credit Card
 
 const productVariantList = await db.select().from(schema.productVariant);
 
@@ -286,12 +286,12 @@ for (let i = 0; i < insertedTransactions.length; i++) {
   const variant = productVariantList[i % productVariantList.length];
 
   transactionItemRows.push({
-    transactionId: trx.id,
-    productId: variant.productId,
-    productVariantId: variant.id,
+    transactionId: trx!.id,
+    productId: variant!.productId,
+    productVariantId: variant!.id,
     quantity: 1,
-    createdAt: trx.createdAt,
-    updatedAt: trx.createdAt,
+    createdAt: trx!.createdAt,
+    updatedAt: trx!.createdAt,
   });
 }
 
