@@ -296,11 +296,11 @@ for (let i = 0; i < transactionSeed.length; i++) {
     buyer: `Buyer ${i + 1}`,
     paymentTypeId: (i % 3) + 1,
     shippingPostalCode: "50000",
-    platformId: platformMap[seed.platform],
-    status: seed.status,
+    platformId: platformMap[seed!.platform],
+    status: seed!.status,
     note: null,
-    createdAt: seed.date,
-    updatedAt: seed.date,
+    createdAt: seed!.date,
+    updatedAt: seed!.date,
   });
 }
 
@@ -322,7 +322,7 @@ let aprilIndex = 0;
 
 for (let i = 0; i < insertedTransactions.length; i++) {
   const trx = insertedTransactions[i];
-  const isApril = trx.createdAt.getMonth() === 3;
+  const isApril = trx!.createdAt!.getMonth() === 3;
 
   let variant;
   let quantity;
@@ -347,12 +347,12 @@ for (let i = 0; i < insertedTransactions.length; i++) {
   }
 
   transactionItemRows.push({
-    transactionId: trx.id,
-    productId: variant.productId,
-    productVariantId: variant.id,
+    transactionId: trx!.id,
+    productId: variant!.productId,
+    productVariantId: variant!.id,
     quantity,
-    createdAt: trx.createdAt,
-    updatedAt: trx.createdAt,
+    createdAt: trx!.createdAt,
+    updatedAt: trx!.createdAt,
   });
 }
 
