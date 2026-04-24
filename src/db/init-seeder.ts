@@ -83,7 +83,6 @@ const mappings = [
     ],
     platforms: [
       { platform: "shopee", sku: "jackpot-4" },
-      { platform: "lazada", sku: "4657068807" },
       { platform: "lazada", sku: "2878552272" },
       { platform: "tiktok shop", sku: "jackpot-l-blue" },
       { platform: "tiktok shop", sku: "jackpot-l-green" },
@@ -96,7 +95,6 @@ const mappings = [
     platforms: [
       { platform: "shopee", sku: "jackpot-4-colorful" },
       { platform: "lazada", sku: "4657068807" },
-      { platform: "lazada", sku: "2878552272" },
       { platform: "tiktok shop", sku: "jackpot-4-colorful" },
     ],
   },
@@ -368,9 +366,9 @@ const mappings = [
   },
   {
     productName: "Plastic Chess Pieces",
-    variants: [{ size: "No Size", color: "No Color" }],
+    variants: [{ size: "No Size", color: "Black White" }],
     platforms: [
-      { platform: "shopee", sku: "plasticchesspieces" },
+      { platform: "shopee", sku: "plasticchesspieces-b&w" },
       { platform: "lazada", sku: "5865889965" },
       { platform: "tiktok shop", sku: "chesspieces-b&w-plastic" },
     ],
@@ -382,7 +380,7 @@ const mappings = [
       { size: "No Size", color: "Red White" },
     ],
     platforms: [
-      { platform: "shopee", sku: "thaichesspieceplastic-makruk" },
+      { platform: "shopee", sku: "thaichesspieces-makruk" },
       { platform: "lazada", sku: "5860210221" },
       { platform: "tiktok shop", sku: "chesspieces-r&w" },
       { platform: "tiktok shop", sku: "chesspieces-b&w" },
@@ -521,6 +519,7 @@ const mappings = [
     variants: [
       { size: "Size S", color: "No Color" },
       { size: "Size M", color: "No Color" },
+      { size: "Size L", color: "No Color" },
     ],
 
     platforms: [
@@ -572,7 +571,7 @@ const mappings = [
   },
   {
     productName: "Wooden Draught Board",
-    variants: [{ size: "Size M", color: "No Color" }],
+    variants: [{ size: "No Size", color: "No Color" }],
     platforms: [
       { platform: "shopee", sku: "woodendraughtboard" },
       { platform: "lazada", sku: "5386406112" },

@@ -131,7 +131,7 @@ export async function resolveVariant(
   productName: string,
   variation: string,
 ) {
-  // ✅ 1. หา product จาก SKU ก่อน
+  
   let productId = null;
 
   if (externalProductSku) {
@@ -151,10 +151,10 @@ export async function resolveVariant(
 
   if (!productId) return null;
 
-  // ✅ 2. build raw text
+  // build raw text
   const rawVariant = normalize(`${productName} ${variation}`);
 
-  // ✅ 4. fallback parser
+  // fallback parser
   const parsed = smartVariantResolver(rawVariant, variation, platformId);
 
   const productVariant =
@@ -207,7 +207,7 @@ function normalizeVariant(str: string) {
 }
 
 // -------------------------
-// 🔥 EXTRACT SIZE (robust)
+// EXTRACT SIZE (robust)
 // -------------------------
 function extractSize(text: string): SizeKey {
   // 1. size l
@@ -226,7 +226,7 @@ function extractSize(text: string): SizeKey {
 }
 
 // -------------------------
-// 🔥 EXTRACT VERSION
+// EXTRACT VERSION
 // -------------------------
 function extractVersion(text: string): VersionKey {
   if (/\bv2\b|version\s*2/.test(text)) return "v2";
@@ -241,20 +241,19 @@ export function smartVariantResolver(
   const normalizedText = normalizeVariant(text);
   const normalizedVar = normalizeVariant(rawVariation);
 
-  // 🔥 IMPORTANT: variation priority สูงกว่า
   const combined = `${normalizedVar} ${normalizedText}`;
 
   let colorId = DEFAULT_COLOR;
   let sizeId = DEFAULT_SIZE;
 
   // -------------------------
-  // 🔥 GENERIC PARSING (ใหม่)
+  // GENERIC PARSING (ใหม่)
   // -------------------------
   const size = extractSize(combined);
   const version = extractVersion(combined);
 
   // -------------------------
-  // 🔥 SIZE MAPPING (generic)
+  // SIZE MAPPING (generic)
   // -------------------------
   if (version === "v2") {
     if (size === "m")
@@ -268,11 +267,11 @@ export function smartVariantResolver(
   }
 
   // -------------------------
-  // 🔥 COLOR (specific ก่อน)
+  // COLOR (specific ก่อน)
   // -------------------------
-  if (/red\s*white|แดง\s*ขาว/.test(combined)) {
+  if (/red[\s\-–—]*white|แดง[\s\-–—]*ขาว/.test(combined)) {
     colorId = 5;
-  } else if (/black\s*white|ดำ\s*ขาว/.test(combined)) {
+  } else if (/black[\s\-–—]*white|ดำ[\s\-–—]*ขาว/.test(combined)) {
     colorId = 6;
   } else if (/new\s*red/.test(combined)) {
     colorId = 7;
@@ -281,14 +280,14 @@ export function smartVariantResolver(
   }
 
   // -------------------------
-  // 🔥 SPECIAL CASE: Jenga Colorful standalone → No Color
+  // SPECIAL CASE: Jenga Colorful standalone → No Color
   // -------------------------
   if (/genga\s*colorful/i.test(combined)) {
     colorId = 14;
   }
 
   // -------------------------
-  // 🔥 SPECIAL CASE: Lazada (platformId === 2)
+  // SPECIAL CASE: Lazada (platformId === 2)
   // -------------------------
   if (
     /genga.*colorful|colorful.*genga/i.test(combined) &&
@@ -300,7 +299,7 @@ export function smartVariantResolver(
   }
 
   // -------------------------
-  // 🔥 SPECIAL CASE: TikTok (platformId === 3)
+  // SPECIAL CASE: TikTok (platformId === 3)
   // -------------------------
   if (platformId === 3) {
     const isV2 = version === "v2";
@@ -308,7 +307,7 @@ export function smartVariantResolver(
     if (/colorful\s*genga/i.test(combined)) {
       if (isV2) {
         if (size === "s")
-          sizeId = 6; // business rule เดิม
+          sizeId = 6;
         else if (size === "m") sizeId = 6;
         else if (size === "l") sizeId = 7;
       } else {
@@ -328,31 +327,44 @@ export function smartVariantResolver(
   }
 
   // -------------------------
-  // 🔥 COLOR (generic)
+  // COLOR (generic)
   // -------------------------
-  else if (/colorful/.test(combined) && !/genga/.test(combined)) {
-    colorId = 9;
-  } else if (/red|แดง/.test(combined)) {
-    colorId = 1;
-  } else if (/blue|น้ำเงิน/.test(combined)) {
-    colorId = 2;
-  } else if (/green|เขียว/.test(combined)) {
-    colorId = 3;
-  } else if (/orange|ส้ม/.test(combined)) {
-    colorId = 4;
-  } else if (/white|ขาว/.test(combined)) {
-    colorId = 13;
+  if (colorId === DEFAULT_COLOR) {
+    if (/colorful/.test(combined) && !/genga/.test(combined)) {
+      colorId = 9;
+    } else if (/red|แดง/.test(combined)) {
+      colorId = 1;
+    } else if (/blue|น้ำเงิน/.test(combined)) {
+      colorId = 2;
+    } else if (/green|เขียว/.test(combined)) {
+      colorId = 3;
+    } else if (/orange|ส้ม/.test(combined)) {
+      colorId = 4;
+    } else if (/white|ขาว/.test(combined)) {
+      colorId = 13;
+    }
   }
 
   // -------------------------
-  // 🔥 SPECIAL (points)
+  // SPECIAL (domino points)
   // -------------------------
-  if (/6\s*point/.test(combined)) {
-    colorId = 10;
-  } else if (/9\s*point/.test(combined)) {
-    colorId = 11;
-  } else if (/12\s*point/.test(combined)) {
-    colorId = 12;
+  if (/domino|โดมิโน่/.test(combined)) {
+    // priority 1: selected variation ก่อน
+    if (/12\s*(point|จุด)/.test(normalizedVar)) {
+      colorId = 12;
+    } else if (/9\s*(point|จุด)/.test(normalizedVar)) {
+      colorId = 11;
+    } else if (/6\s*(point|จุด)/.test(normalizedVar)) {
+      colorId = 10;
+
+      // priority 2: fallback ไป text
+    } else if (/12\s*(point|จุด)/.test(normalizedText)) {
+      colorId = 12;
+    } else if (/9\s*(point|จุด)/.test(normalizedText)) {
+      colorId = 11;
+    } else if (/6\s*(point|จุด)/.test(normalizedText)) {
+      colorId = 10;
+    }
   }
 
   return { colorId, sizeId };
