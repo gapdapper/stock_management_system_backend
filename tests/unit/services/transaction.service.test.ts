@@ -57,10 +57,6 @@ describe("UTC-03-03: getTransactions()", () => {
 
     const result = await getTransactions();
 
-    expect(dailyUploadLogRepository.updateDailyUploadLog).toHaveBeenCalledTimes(
-      1,
-    );
-
     expect(transactionRepository.findAllTransactions).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual(mockTransactions);
@@ -73,10 +69,6 @@ describe("UTC-03-03: getTransactions()", () => {
 
     await expect(getTransactions()).rejects.toBeInstanceOf(NotFoundError);
 
-    expect(dailyUploadLogRepository.updateDailyUploadLog).toHaveBeenCalledTimes(
-      1,
-    );
-
     expect(transactionRepository.findAllTransactions).toHaveBeenCalledTimes(1);
   });
 
@@ -88,10 +80,6 @@ describe("UTC-03-03: getTransactions()", () => {
     );
 
     await expect(getTransactions()).rejects.toThrow("Database error");
-
-    expect(dailyUploadLogRepository.updateDailyUploadLog).toHaveBeenCalledTimes(
-      1,
-    );
 
     expect(transactionRepository.findAllTransactions).toHaveBeenCalledTimes(1);
   });

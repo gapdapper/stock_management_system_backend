@@ -19,7 +19,6 @@ import BadRequestError from "@/utils/errors/bad-request";
 
 // #region Transaction
 export const getTransactions = async () => {
-  await dailyUploadLogRepository.updateDailyUploadLog(new Date());
   const transactions = await transactionRepository.findAllTransactions();
   if (!transactions) {
     throw new NotFoundError({
